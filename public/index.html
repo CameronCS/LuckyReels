@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 Lucky Reels Casino</title>
+<link rel="stylesheet" href="/css/index.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- ── Auth Lobby ────────────────────────────────── -->
+<div class="lobby" id="lobby">
+  <div class="lobby-card">
+    <div class="lobby-logo">Lucky Reels</div>
+    <p class="lobby-tagline">Casino · Est. Tonight</p>
+
+    <div class="lobby-tabs">
+      <button class="lobby-tab active" id="tabRegister">Register</button>
+      <button class="lobby-tab"        id="tabLogin"   >Login</button>
+    </div>
+
+    <input class="lobby-input" id="nameInput"     placeholder="Username..."  maxlength="20" autocomplete="off">
+    <input class="lobby-input" id="passwordInput" placeholder="Password..."  maxlength="72" type="password" style="margin-bottom:4px">
+
+    <div class="lobby-error" id="lobbyError"></div>
+    <button class="lobby-btn" id="lobbySubmitBtn">CREATE ACCOUNT</button>
+  </div>
+</div>
+
+<!-- ── Hub ───────────────────────────────────────── -->
+<div class="hub" id="hub" style="display:none">
+
+  <div class="hub-header">
+    <div>
+      <div class="hub-title">Lucky Reels Casino</div>
+      <div class="hub-sub">Choose your game</div>
+    </div>
+    <div class="hub-player">
+      <div class="hub-name-pill">
+        <div class="hub-online-dot"></div>
+        <span id="hubPlayerName">—</span>
+      </div>
+      <div class="hub-tokens">
+        <div class="hub-tokens-label">🪙 Tokens</div>
+        <div class="hub-tokens-value" id="hubTokens">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-select-label">Select a game</div>
+
+  <div class="game-cards">
+    <a class="game-card slots" href="/slots.html">
+      <div class="game-icon">🎰</div>
+      <div class="game-name">Lucky Reels</div>
+      <div class="game-desc">Spin the reels and match symbols.<br>Jackpot pays up to 50× your bet.</div>
+      <button class="game-play-btn">PLAY</button>
+    </a>
+
+    <a class="game-card bj" href="/blackjack.html">
+      <div class="game-icon">🃏</div>
+      <div class="game-name">Blackjack</div>
+      <div class="game-desc">Beat the dealer without going over 21.<br>Blackjack pays 3 to 2.</div>
+      <button class="game-play-btn">PLAY</button>
+    </a>
+
+    <a class="game-card roulette" href="/roulette.html">
+      <div class="game-icon">🎡</div>
+      <div class="game-name">Roulette</div>
+      <div class="game-desc">Bet on numbers, colors, or groups.<br>Straight up pays 35 to 1.</div>
+      <button class="game-play-btn">PLAY</button>
+    </a>
+
+    <a class="game-card horse" href="/horse.html">
+      <div class="game-icon">🏇</div>
+      <div class="game-name">Horse Racing</div>
+      <div class="game-desc">Pick your horse and watch the race.<br>Winner pays 4 to 1.</div>
+      <button class="game-play-btn">PLAY</button>
+    </a>
+  </div>
+
+</div>
+
+<script src="/js/index.js" defer></script>
+</body>
+</html>

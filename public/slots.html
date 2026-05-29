@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 Lucky Reels</title>
+<link rel="stylesheet" href="/css/slots.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="loading-screen" id="loadingScreen">Connecting...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <!-- Header -->
+  <div class="game-header">
+    <a class="back-btn" href="/">← Hub</a>
+    <div class="header-center">
+      <h1>Lucky Reels</h1>
+      <p class="tagline">Spin to Win · Pull the Handle</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill" id="playerPill">👤 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="bet-section">
+      <span class="bet-label">Bet</span>
+      <button class="bet-btn active" data-val="1">1</button>
+      <button class="bet-btn" data-val="5">5</button>
+      <button class="bet-btn" data-val="10">10</button>
+      <button class="bet-btn" data-val="25">25</button>
+      <button class="bet-btn" data-val="50">50</button>
+      <button class="bet-btn" data-val="100">100</button>
+      <input class="bet-custom" type="number" id="betCustom" placeholder="custom" min="1">
+    </div>
+    <div class="controls-divider"></div>
+    <div class="machine-section">
+      <span class="machine-count-label" id="machineCountLabel">1 MACHINE</span>
+      <button class="add-machine-btn" id="addMachineBtn">+ ADD</button>
+    </div>
+  </div>
+
+  <!-- Machines -->
+  <div class="machines-grid cols-1" id="machinesGrid"></div>
+
+  <!-- Footer -->
+  <div class="game-footer">
+    <div class="message-bar neutral" id="messageBar"></div>
+    <div class="no-tokens" id="noTokens">⛔ Out of tokens — ask the admin to top you up.</div>
+    <button class="spin-btn" id="spinBtn">SPIN</button>
+    <button class="paytable-toggle-btn">Paytable ▾</button>
+    <div class="paytable-content" id="paytableContent">
+      <div class="paytable-grid">
+        <div class="pay-row"><div class="pay-symbols">💎💎💎</div><div class="pay-amount">×50</div></div>
+        <div class="pay-row"><div class="pay-symbols">7️⃣7️⃣7️⃣</div><div class="pay-amount">×20</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍀🍀🍀</div><div class="pay-amount">×15</div></div>
+        <div class="pay-row"><div class="pay-symbols">⭐⭐⭐</div><div class="pay-amount">×10</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍒🍒🍒</div><div class="pay-amount">×5</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍋🍋🍋</div><div class="pay-amount">×3</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/js/slots.js" defer></script>
+</body>
+</html>

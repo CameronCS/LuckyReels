@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎰 Lucky Reels — Admin</title>
+<link rel="stylesheet" href="/css/admin.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ── Admin Login Overlay ───────────────────────────────────── -->
+<div class="admin-login-overlay" id="adminLoginOverlay">
+  <div class="admin-login-card">
+    <h2>Admin Login</h2>
+    <p class="admin-login-sub">Lucky Reels · Control Panel</p>
+    <input class="admin-login-input" id="adminUsernameInput" placeholder="Username" autocomplete="off">
+    <input class="admin-login-input" id="adminPasswordInput" placeholder="Password" type="password">
+    <div class="admin-login-error" id="adminLoginError"></div>
+    <button class="admin-login-btn" id="adminLoginBtn">LOGIN</button>
+  </div>
+</div>
+
+<!-- ── Main Panel (hidden until login) ──────────────────────── -->
+<div class="main" id="mainPanel" style="display:none">
+
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-left">
+      <div class="admin-badge">⚡ Admin Panel</div>
+      <h1>Lucky Reels</h1>
+      <p class="tagline">Master Control · Live Session</p>
+    </div>
+    <div class="header-right">
+      <div class="stat-block">
+        <div class="stat-value" id="statConnected">0</div>
+        <div class="stat-label">Connected</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-block">
+        <div class="stat-value" id="statTokens">0</div>
+        <div class="stat-label">🪙 Total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player link -->
+  <div class="link-bar">
+    <span class="link-bar-label">📡 Player Link</span>
+    <span class="link-text" id="playerLinkText">—</span>
+    <button class="copy-btn" id="copyLinkBtn">Copy</button>
+  </div>
+
+  <!-- Players -->
+  <div class="section-header">
+    <span class="section-title">Players</span>
+    <span class="player-count" id="playerCount">—</span>
+  </div>
+
+  <div class="players-grid" id="playerList">
+    <div class="empty-state">Waiting for players...</div>
+  </div>
+
+  <!-- Admin actions log -->
+  <div class="global-log">
+    <div class="section-header">
+      <span class="section-title">Admin Actions</span>
+    </div>
+    <div class="global-log-scroll">
+      <div id="adminLogEntries">
+        <div class="global-log-entry"><span style="color:#2a2a3a">No actions yet</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add admin -->
+  <div class="global-log">
+    <div class="section-header">
+      <span class="section-title">Add Admin</span>
+    </div>
+    <div class="add-admin-form">
+      <input class="add-admin-input" id="newAdminUsername" type="text"     placeholder="Username"         autocomplete="off" maxlength="40">
+      <input class="add-admin-input" id="newAdminPassword" type="password" placeholder="Password (min 6)" autocomplete="new-password" maxlength="72">
+      <button class="add-admin-btn" id="addAdminBtn">CREATE</button>
+    </div>
+    <div class="add-admin-error" id="addAdminError"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/admin.js" defer></script>
+</body>
+</html>

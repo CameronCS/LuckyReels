@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏇 Horse Racing</title>
+<link rel="stylesheet" href="/css/horse.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">CONNECTING...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <div class="game-header">
+    <a class="back-btn" href="/">← LOBBY</a>
+    <div class="header-center">
+      <h1>Horse Racing</h1>
+      <p class="tagline">6 Horses · Pick One · Winner Pays 4×</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">🏇 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Pick a horse and place your bet</div>
+
+  <div class="track-section" id="trackSection">
+    <!-- Built by JS -->
+  </div>
+
+  <div class="betting-section">
+    <div class="horse-cards" id="horseCards">
+      <!-- Built by JS -->
+    </div>
+
+    <div class="bet-controls">
+      <div class="chip-row">
+        <span class="ctrl-label">CHIP</span>
+        <button class="chip" data-val="1">1</button>
+        <button class="chip active" data-val="10">10</button>
+        <button class="chip" data-val="25">25</button>
+        <button class="chip" data-val="50">50</button>
+        <button class="chip" data-val="100">100</button>
+        <button class="chip chip-custom" id="customChipBtn">CUSTOM</button>
+        <input type="number" id="customChipInput" class="custom-chip-input" min="1" max="999999" placeholder="amount" style="display:none">
+      </div>
+      <div class="action-row">
+        <div class="bet-display">BET <span id="betDisplay">10</span></div>
+        <button class="btn-race" id="raceBtn">RACE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-tokens-msg" id="noTokensMsg" style="display:none">
+    ⛔ Out of tokens — ask the admin to top you up.
+  </div>
+
+  <div class="rules-strip">
+    <div class="rule"><span>Pick One Horse</span>winner pays 4×</div>
+    <div class="rule"><span>6 Horses</span>equal chance to win</div>
+    <div class="rule"><span>Close Race</span>90% of the time</div>
+    <div class="rule"><span>Blowout</span>some serious losers — 10%</div>
+  </div>
+
+</div>
+
+<script src="/js/horse.js" defer></script>
+</body>
+</html>

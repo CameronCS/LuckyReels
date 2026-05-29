@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check server.js)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, Attributes)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Exclude node_modules)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Recurse | Where-Object { $_.FullName -notmatch \"node_modules\" } | Select-Object FullName)",
+      "Bash(node *)"
+    ]
+  }
+}

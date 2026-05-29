@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🃏 Blackjack</title>
+<link rel="stylesheet" href="/css/blackjack.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">Connecting...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <!-- Header -->
+  <div class="game-header">
+    <a class="back-btn" href="/">← Hub</a>
+    <div class="header-center">
+      <h1>Blackjack</h1>
+      <p class="tagline">Beat the Dealer · 3 to 2</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill" id="playerPill">🃏 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bj-table">
+
+    <div class="bj-side dealer-side">
+      <div class="side-label">
+        DEALER
+        <span class="side-total" id="dealerTotal"></span>
+      </div>
+      <div class="cards-row" id="dealerCards"></div>
+    </div>
+
+    <div class="result-bar" id="resultBar"></div>
+
+    <div class="bj-side player-side">
+      <div class="side-label">
+        YOU
+        <span class="side-total" id="playerTotal"></span>
+      </div>
+      <div class="cards-row" id="playerCards"></div>
+    </div>
+
+  </div>
+
+  <!-- Bet controls -->
+  <div class="controls-bar">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn active" data-val="1">1</button>
+    <button class="bet-btn" data-val="5">5</button>
+    <button class="bet-btn" data-val="10">10</button>
+    <button class="bet-btn" data-val="25">25</button>
+    <button class="bet-btn" data-val="50">50</button>
+    <button class="bet-btn" data-val="100">100</button>
+    <input class="bet-custom" type="number" id="betCustom" placeholder="custom" min="1">
+    <div class="current-bet-display">BET <span id="betDisplay">1</span></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="action-bar" id="actionBar">
+    <!-- filled by JS -->
+  </div>
+
+  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <!-- Rules -->
+  <div class="rules-strip">
+    <div class="rule"><span>Blackjack</span>pays 3:2</div>
+    <div class="rule"><span>Win</span>pays 1:1</div>
+    <div class="rule"><span>Dealer</span>stands on 17</div>
+    <div class="rule"><span>Double</span>one card only</div>
+  </div>
+
+</div>
+
+<script src="/js/blackjack.js" defer></script>
+</body>
+</html>

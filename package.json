@@ -1,0 +1,11 @@
+{
+  "name": "lucky-reels",
+  "version": "2.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.4.2",
+    "mysql2": "^3.11.0",
+    "ws": "^8.18.0"
+  }
+}

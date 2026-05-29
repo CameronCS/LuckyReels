@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎡 Roulette</title>
+<link rel="stylesheet" href="/css/roulette.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">CONNECTING...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <div class="game-header">
+    <a class="back-btn" href="/">← LOBBY</a>
+    <div class="header-center">
+      <h1>Roulette</h1>
+      <p class="tagline">American · 38 Pockets · 0 and 00</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">🎡 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wheel-section">
+    <canvas id="wheelCanvas" width="260" height="260"></canvas>
+    <div class="wheel-info">
+      <div class="win-num-display" id="winNum">—</div>
+      <div class="result-bar" id="resultBar"></div>
+    </div>
+  </div>
+
+  <div class="controls-section">
+    <div class="chip-row">
+      <span class="ctrl-label">CHIP</span>
+      <button class="chip" data-val="1">1</button>
+      <button class="chip active" data-val="5">5</button>
+      <button class="chip" data-val="10">10</button>
+      <button class="chip" data-val="25">25</button>
+      <button class="chip" data-val="50">50</button>
+      <button class="chip" data-val="100">100</button>
+      <button class="chip chip-custom" id="customChipBtn">CUSTOM</button>
+      <input type="number" id="customChipInput" class="custom-chip-input" min="1" max="999999" placeholder="amount" style="display:none">
+    </div>
+    <div class="action-row">
+      <button class="btn-clear" id="clearBtn">CLEAR</button>
+      <div class="total-display">BET <span id="totalBetDisplay">0</span></div>
+      <button class="btn-spin" id="spinBtn">SPIN</button>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="bet-table" id="betTable"></div>
+  </div>
+
+  <div class="no-tokens-msg" id="noTokensMsg" style="display:none">
+    ⛔ Out of tokens — ask the admin to top you up.
+  </div>
+
+  <div class="rules-strip">
+    <div class="rule"><span>Straight Up</span>35 to 1</div>
+    <div class="rule"><span>Column / Dozen</span>2 to 1</div>
+    <div class="rule"><span>Red / Black</span>1 to 1</div>
+    <div class="rule"><span>Odd / Even</span>1 to 1</div>
+    <div class="rule"><span>1–18 / 19–36</span>1 to 1</div>
+    <div class="rule"><span>0 and 00</span>take all outside bets</div>
+  </div>
+
+</div>
+
+<script src="/js/roulette.js" defer></script>
+</body>
+</html>
