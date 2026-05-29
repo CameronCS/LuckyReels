@@ -161,13 +161,9 @@ function spin() {
     const t = Math.min((now - startTime) / 4500, 1);
     wheelRot = startRot + (fakeTarget - startRot) * easeOut(t);
     drawWheel();
-    if (t < 1) frameHandle = requestAnimationFrame(animFrame);
+    if (t < 1) spin._frameHandle = requestAnimationFrame(animFrame);
   }
-  frameHandle = requestAnimationFrame(animFrame);
-
-  spin._frameHandle = frameHandle;
-  spin._startRot    = startRot;
-  spin._startTime   = startTime;
+  spin._frameHandle = requestAnimationFrame(animFrame);
 }
 
 function animateToResult(winNum, net, newTokens, winningKeys) {
