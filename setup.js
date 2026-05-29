@@ -118,6 +118,22 @@ async function main() {
   `);
 
   await con.query(`
+    CREATE TABLE IF NOT EXISTS baccarat_logs (
+      id           BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      player_id    CHAR(36)     NOT NULL,
+      bet_type     VARCHAR(10)  NOT NULL,
+      outcome      VARCHAR(10)  NOT NULL,
+      player_hand  VARCHAR(60)  NOT NULL,
+      banker_hand  VARCHAR(60)  NOT NULL,
+      bet          INT          NOT NULL,
+      net          INT          NOT NULL,
+      created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_bac_player_time (player_id, created_at),
+      CONSTRAINT fk_bac_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
+  `);
+
+  await con.query(`
     CREATE TABLE IF NOT EXISTS admins (
       id            INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
       username      VARCHAR(40)  NOT NULL,

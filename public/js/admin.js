@@ -52,6 +52,12 @@ ws.addEventListener('message', (e) => {
     return;
   }
 
+  if (msg.type === 'baccaratEvent') {
+    const { playerId, betType, outcome, playerCards, bankerCards, bet, net } = msg;
+    pushGameEvent(playerId, { game: 'baccarat', betType, outcome, playerCards, bankerCards, bet, net, time: new Date().toLocaleTimeString() });
+    return;
+  }
+
   if (msg.type === 'createAdmin:ok') {
     document.getElementById('newAdminUsername').value = '';
     document.getElementById('newAdminPassword').value = '';
@@ -359,6 +365,9 @@ function buildFilterPills(playerId) {
     pills.push(`<button class="filter-pill ${active === 'roulette' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="roulette">🎡 Roulette</button>`);
   if (hasHorse)
     pills.push(`<button class="filter-pill ${active === 'horse' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="horse">🏇 Horses</button>`);
+  const hasBaccarat = logs.some(l => l.game === 'baccarat');
+  if (hasBaccarat)
+    pills.push(`<button class="filter-pill ${active === 'baccarat' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="baccarat">🎴 Baccarat</button>`);
   machines.forEach(n =>
     pills.push(`<button class="filter-pill ${active === n ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="${n}">M${n}</button>`)
   );
@@ -381,6 +390,7 @@ function buildLogEntries(playerId) {
   else if (filter === 'blackjack') entries = all.filter(e => e.game === 'blackjack');
   else if (filter === 'roulette')  entries = all.filter(e => e.game === 'roulette');
   else if (filter === 'horse')     entries = all.filter(e => e.game === 'horse');
+  else if (filter === 'baccarat')  entries = all.filter(e => e.game === 'baccarat');
   else                             entries = all.filter(e => e.game === 'slots' && e.machineNum === filter);
 
   if (entries.length === 0) {
@@ -418,6 +428,17 @@ function buildLogEntries(playerId) {
         <span class="spin-icon">${icons[e.result] || '·'}</span>
         <span class="spin-machine" style="color:#0AF5F5;font-size:8px">BJ</span>
         <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.playerCards || '')} <span style="color:#444">vs</span> ${escHtml(e.dealerCards || '')}</span>
+        <span class="spin-amount ${amtClass}">${amtText}</span>
+        <span class="spin-time">${e.time}</span></div>`;
+    }
+    if (e.game === 'baccarat') {
+      const amtClass = e.net > 0 ? 'pos' : e.net < 0 ? 'neg' : '';
+      const amtText  = e.net > 0 ? `+${e.net}` : e.net < 0 ? `−${Math.abs(e.net)}` : 'Push';
+      const icon     = e.net > 0 ? '🎴' : e.net === 0 ? '🔵' : '❌';
+      return `<div class="spin-entry">
+        <span class="spin-icon">${icon}</span>
+        <span class="spin-machine" style="color:#c688ff;font-size:8px">BAC</span>
+        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.betType)} · ${escHtml(e.outcome)}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }

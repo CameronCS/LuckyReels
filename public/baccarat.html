@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎴 Baccarat</title>
+<link rel="stylesheet" href="/css/baccarat.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">Connecting...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <!-- Header -->
+  <div class="game-header">
+    <a class="back-btn" href="/">← Hub</a>
+    <div class="header-center">
+      <h1>Baccarat</h1>
+      <p class="tagline">Punto Banco · 8 Decks</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill" id="playerPill">🎴 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bac-table">
+
+    <div class="bac-side banker-side">
+      <div class="side-label banker">
+        BANKER
+        <span class="side-score" id="bankerScore"></span>
+      </div>
+      <div class="cards-row" id="bankerCards"></div>
+    </div>
+
+    <div class="result-bar" id="resultBar"></div>
+
+    <div class="bac-side player-side">
+      <div class="side-label player">
+        PLAYER
+        <span class="side-score" id="playerScore"></span>
+      </div>
+      <div class="cards-row" id="playerCards"></div>
+    </div>
+
+  </div>
+
+  <!-- Bet type -->
+  <div class="bet-type-row">
+    <div class="bet-type-btn player-btn selected" id="btnPlayer">
+      <span class="bet-type-label">Player</span>
+      <span class="bet-type-odds">Pays 1:1 · Push on Tie</span>
+    </div>
+    <div class="bet-type-btn tie-btn" id="btnTie">
+      <span class="bet-type-label">Tie</span>
+      <span class="bet-type-odds">Pays 8:1</span>
+    </div>
+    <div class="bet-type-btn banker-btn" id="btnBanker">
+      <span class="bet-type-label">Banker</span>
+      <span class="bet-type-odds">Pays 0.95:1 · Push on Tie</span>
+    </div>
+  </div>
+
+  <!-- Bet amount -->
+  <div class="controls-bar">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn active" data-val="1">1</button>
+    <button class="bet-btn" data-val="5">5</button>
+    <button class="bet-btn" data-val="10">10</button>
+    <button class="bet-btn" data-val="25">25</button>
+    <button class="bet-btn" data-val="50">50</button>
+    <button class="bet-btn" data-val="100">100</button>
+    <input class="bet-custom" type="number" id="betCustom" placeholder="custom" min="1">
+    <div class="current-bet-display">BET <span id="betDisplay">1</span></div>
+  </div>
+
+  <!-- Action -->
+  <div class="action-bar" id="actionBar"></div>
+  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <!-- Rules -->
+  <div class="rules-strip">
+    <div class="rule"><span class="player">Player</span>pays 1:1</div>
+    <div class="rule"><span class="banker">Banker</span>pays 0.95:1</div>
+    <div class="rule"><span class="tie">Tie</span>pays 8:1</div>
+    <div class="rule"><span style="color:#888">Push</span>Tie returns P/B bets</div>
+    <div class="rule"><span style="color:#888">Natural</span>8 or 9 on initial deal</div>
+  </div>
+
+</div>
+
+<script src="/js/baccarat.js" defer></script>
+</body>
+</html>

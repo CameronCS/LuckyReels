@@ -6,6 +6,7 @@
   --panel: #12121a;
   --border: #2a2a3a;
   --green: #00FF87;
+  --purple: #c688ff;
   --blue: #0AF5F5;
   --text: #e8e8f0;
 }
@@ -275,12 +276,14 @@ body::before {
 .game-card.slots::before    { background: linear-gradient(90deg, transparent, var(--gold),  transparent); }
 .game-card.bj::before       { background: linear-gradient(90deg, transparent, var(--blue),  transparent); }
 .game-card.roulette::before { background: linear-gradient(90deg, transparent, var(--red),   transparent); }
-.game-card.horse::before    { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.game-card.horse::before    { background: linear-gradient(90deg, transparent, var(--green),  transparent); }
+.game-card.baccarat::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
 .game-card:hover { transform: translateY(-4px); border-color: #444; }
 .game-card.slots:hover    { border-color: rgba(255,215,0,0.4);  box-shadow: 0 8px 32px rgba(255,215,0,0.08); }
 .game-card.bj:hover       { border-color: rgba(10,245,245,0.4); box-shadow: 0 8px 32px rgba(10,245,245,0.08); }
 .game-card.roulette:hover { border-color: rgba(255,45,85,0.4);  box-shadow: 0 8px 32px rgba(255,45,85,0.08); }
-.game-card.horse:hover    { border-color: rgba(0,255,135,0.4);  box-shadow: 0 8px 32px rgba(0,255,135,0.08); }
+.game-card.horse:hover    { border-color: rgba(0,255,135,0.4);   box-shadow: 0 8px 32px rgba(0,255,135,0.08); }
+.game-card.baccarat:hover { border-color: rgba(198,136,255,0.4); box-shadow: 0 8px 32px rgba(198,136,255,0.08); }
 .game-card::before { opacity: 1; }
 
 .game-icon {
@@ -299,6 +302,7 @@ body::before {
 .game-card.bj       .game-name { color: var(--blue); }
 .game-card.roulette .game-name { color: var(--red); }
 .game-card.horse    .game-name { color: var(--green); }
+.game-card.baccarat .game-name { color: var(--purple); }
 
 .game-desc {
   font-size: 10px;
@@ -338,6 +342,11 @@ body::before {
   background: rgba(0,255,135,0.1);
   color: var(--green);
   border: 1px solid rgba(0,255,135,0.3);
+}
+.game-card.baccarat .game-play-btn {
+  background: rgba(198,136,255,0.1);
+  color: var(--purple);
+  border: 1px solid rgba(198,136,255,0.3);
 }
 .game-card:hover .game-play-btn { transform: scale(1.04); }
 
