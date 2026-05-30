@@ -43,6 +43,7 @@ worker.port.addEventListener('message', ({ data: msg }) => {
   if (msg.type === 'tokens') {
     tokens = msg.value; bumpTokens(); updateTokenDisplay(); return;
   }
+  if (msg.type === 'bonus') { tokens = msg.tokens; bumpTokens(); updateTokenDisplay(); return; }
   if (msg.type === 'crash:started') {
     tokens = msg.tokens;
     serverStartTime = msg.startTime;

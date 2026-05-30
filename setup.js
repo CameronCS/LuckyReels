@@ -55,10 +55,16 @@ async function main() {
       name          VARCHAR(20)  NOT NULL,
       password_hash VARCHAR(60)  NOT NULL,
       tokens        INT          NOT NULL DEFAULT 0,
+      last_bonus_at DATETIME     NULL,
       created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
       UNIQUE KEY uq_name (name)
     ) ENGINE=InnoDB;
   `);
+
+  // Migration: add last_bonus_at for existing installs (silently ignored if already present)
+  await con.query(`
+    ALTER TABLE players ADD COLUMN last_bonus_at DATETIME NULL
+  `).catch(() => {});
 
   await con.query(`
     CREATE TABLE IF NOT EXISTS spin_logs (

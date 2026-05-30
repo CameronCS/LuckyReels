@@ -39,7 +39,13 @@ worker.port.addEventListener('message', ({ data: msg }) => {
   if (msg.type === 'tokens') {
     const old = tokens; tokens = msg.value;
     bumpTokens(); updateTokenDisplay();
-    if (msg.value > old && gameState === 'idle') showResult(`🎁 Admin +${msg.value - old}`, 'win');
+    if (msg.value > old && gameState === 'idle') showResult(`Admin +${msg.value - old}`, 'win');
+    return;
+  }
+
+  if (msg.type === 'bonus') {
+    tokens = msg.tokens; bumpTokens(); updateTokenDisplay();
+    if (gameState === 'idle') showResult(`+${msg.amount.toLocaleString()} hourly bonus!`, 'win');
     return;
   }
 

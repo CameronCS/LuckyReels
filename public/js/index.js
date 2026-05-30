@@ -12,6 +12,10 @@ for (let i = 0; i < 100; i++) {
 }
 
 // ── Shared WebSocket worker ────────────────────────────────────────
+if (sessionStorage.getItem('sessionToken')) {
+  document.getElementById('lobby').classList.add('hidden');
+}
+
 const worker = new SharedWorker('/js/ws-worker.js');
 worker.port.start();
 worker.port.postMessage({ type: 'init', token: sessionStorage.getItem('sessionToken') });
@@ -57,6 +61,13 @@ worker.port.addEventListener('message', ({ data: msg }) => {
 
   if (msg.type === 'tokens') {
     document.getElementById('hubTokens').textContent = msg.value;
+    const el = document.getElementById('hubTokens');
+    el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+    return;
+  }
+
+  if (msg.type === 'bonus') {
+    document.getElementById('hubTokens').textContent = msg.tokens;
     const el = document.getElementById('hubTokens');
     el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
     return;

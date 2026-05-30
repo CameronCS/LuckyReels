@@ -52,7 +52,13 @@ worker.port.addEventListener('message', ({ data: msg }) => {
   if (msg.type === 'tokens') {
     const old = tokens; tokens = msg.value;
     bumpTokens(); updateDisplay();
-    if (msg.value > old && !spinning) setMessage(`🎁 Admin added ${msg.value - old} tokens!`, 'win');
+    if (msg.value > old && !spinning) setMessage(`Admin added ${msg.value - old} tokens!`, 'win');
+    return;
+  }
+
+  if (msg.type === 'bonus') {
+    tokens = msg.tokens; bumpTokens(); updateDisplay();
+    if (!spinning) setMessage(`+${msg.amount.toLocaleString()} hourly bonus!`, 'win');
     return;
   }
 

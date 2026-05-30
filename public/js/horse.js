@@ -50,6 +50,7 @@ worker.port.addEventListener('message', ({ data: msg }) => {
   }
   if (msg.type === 'authError') { sessionStorage.removeItem('sessionToken'); window.location.href = '/'; return; }
   if (msg.type === 'tokens') { tokens = msg.value; bumpTokens(); updateTokenDisplay(); return; }
+  if (msg.type === 'bonus') { tokens = msg.tokens; bumpTokens(); updateTokenDisplay(); return; }
 
   if (msg.type === 'horse:result') {
     startRaceAnimation(msg);
