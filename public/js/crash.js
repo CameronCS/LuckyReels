@@ -11,27 +11,28 @@ const canvas = document.getElementById('crashCanvas');
 const ctx    = canvas.getContext('2d');
 
 // ── WebSocket ──────────────────────────────────────────────────────
-const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-const ws = new WebSocket(`${wsProto}://${location.host}`);
+const worker = new SharedWorker('/js/ws-worker.js');
+worker.port.start();
+worker.port.postMessage({ type: 'init', token: sessionStorage.getItem('sessionToken') });
+let wsReady = false, sessionReady = false;
 
-ws.addEventListener('open', () => {
-  const token = sessionStorage.getItem('sessionToken');
-  if (!token) { window.location.href = '/'; return; }
-  ws.send(JSON.stringify({ type: 'reconnect', token }));
-});
-
-ws.addEventListener('message', (e) => {
-  const msg = JSON.parse(e.data);
+worker.port.addEventListener('message', ({ data: msg }) => {
+  if (msg.type === 'ws-open')   { wsReady = true;  return; }
+  if (msg.type === 'ws-closed') { wsReady = false; return; }
 
   if (msg.type === 'joined') {
+    wsReady = true;
     sessionStorage.setItem('sessionToken', msg.sessionToken);
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
-    document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
-    resizeCanvas();
+    if (!sessionReady) {
+      sessionReady = true;
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('gameUI').classList.remove('hidden');
+      resizeCanvas();
+      renderIdle();
+    }
     updateTokenDisplay();
-    renderIdle();
     return;
   }
   if (msg.type === 'authError') {
@@ -42,6 +43,7 @@ ws.addEventListener('message', (e) => {
   if (msg.type === 'tokens') {
     tokens = msg.value; bumpTokens(); updateTokenDisplay(); return;
   }
+  if (msg.type === 'bonus') { tokens = msg.tokens; bumpTokens(); updateTokenDisplay(); return; }
   if (msg.type === 'crash:started') {
     tokens = msg.tokens;
     serverStartTime = msg.startTime;
@@ -87,7 +89,7 @@ ws.addEventListener('message', (e) => {
   }
 });
 
-function sendWS(obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
+function sendWS(obj) { if (wsReady) worker.port.postMessage({ type: 'ws-send', data: obj }); }
 
 // ── Animation loop ─────────────────────────────────────────────────
 function getMultiplier(elapsedMs) {
@@ -223,8 +225,8 @@ function renderIdle() {
 
   const bar      = document.getElementById('actionBar');
   const noTokens = document.getElementById('noTokensMsg');
-  if (tokens <= 0) { bar.innerHTML = ''; noTokens.style.display = 'block'; return; }
-  noTokens.style.display = 'none';
+  if (tokens <= 0) { bar.innerHTML = ''; noTokens.classList.remove('hidden'); return; }
+  noTokens.classList.add('hidden');
   bar.innerHTML = '';
   const canAfford = tokens >= bet;
   const btn = document.createElement('button');

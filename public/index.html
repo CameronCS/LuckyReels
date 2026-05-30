@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎰 Lucky Reels Casino</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/index.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -23,7 +24,7 @@
     </div>
 
     <input class="lobby-input" id="nameInput"     placeholder="Username..."  maxlength="20" autocomplete="off">
-    <input class="lobby-input" id="passwordInput" placeholder="Password..."  maxlength="72" type="password" style="margin-bottom:4px">
+    <input class="lobby-input" id="passwordInput" placeholder="Password..."  maxlength="72" type="password">
 
     <div class="lobby-error" id="lobbyError"></div>
     <button class="lobby-btn" id="lobbySubmitBtn">CREATE ACCOUNT</button>
@@ -31,7 +32,7 @@
 </div>
 
 <!-- ── Hub ───────────────────────────────────────── -->
-<div class="hub" id="hub" style="display:none">
+<div class="hub hidden" id="hub">
 
   <div class="hub-header">
     <div>
@@ -47,6 +48,7 @@
         <div class="hub-tokens-label">🪙 Tokens</div>
         <div class="hub-tokens-value" id="hubTokens">0</div>
       </div>
+      <button class="hub-logout-btn" id="logoutBtn">Logout</button>
     </div>
   </div>
 

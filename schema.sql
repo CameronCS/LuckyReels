@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS players (
   name          VARCHAR(20)  NOT NULL,
   password_hash VARCHAR(60)  NOT NULL,
   tokens        INT          NOT NULL DEFAULT 0,
+  last_bonus_at DATETIME     NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_name (name)
 ) ENGINE=InnoDB;

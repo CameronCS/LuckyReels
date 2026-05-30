@@ -18,26 +18,27 @@ for (let i = 0; i < 80; i++) {
 }
 
 // ── WebSocket ──────────────────────────────────────────────────────
-const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-const ws = new WebSocket(`${wsProto}://${location.host}`);
+const worker = new SharedWorker('/js/ws-worker.js');
+worker.port.start();
+worker.port.postMessage({ type: 'init', token: sessionStorage.getItem('sessionToken') });
+let wsReady = false, sessionReady = false;
 
-ws.addEventListener('open', () => {
-  const token = sessionStorage.getItem('sessionToken');
-  if (!token) { window.location.href = '/'; return; }
-  ws.send(JSON.stringify({ type: 'reconnect', token }));
-});
-
-ws.addEventListener('message', (e) => {
-  const msg = JSON.parse(e.data);
+worker.port.addEventListener('message', ({ data: msg }) => {
+  if (msg.type === 'ws-open')   { wsReady = true;  return; }
+  if (msg.type === 'ws-closed') { wsReady = false; return; }
 
   if (msg.type === 'joined') {
+    wsReady = true;
     sessionStorage.setItem('sessionToken', msg.sessionToken);
     myPlayerId = msg.playerId;
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
-    document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
-    if (machines.length === 0) addMachine();
+    if (!sessionReady) {
+      sessionReady = true;
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('gameUI').classList.remove('hidden');
+      if (machines.length === 0) addMachine();
+    }
     updateDisplay();
     return;
   }
@@ -51,13 +52,25 @@ ws.addEventListener('message', (e) => {
   if (msg.type === 'tokens') {
     const old = tokens; tokens = msg.value;
     bumpTokens(); updateDisplay();
-    if (msg.value > old && !spinning) setMessage(`🎁 Admin added ${msg.value - old} tokens!`, 'win');
+    if (msg.value > old && !spinning) setMessage(`Admin added ${msg.value - old} tokens!`, 'win');
+    return;
+  }
+
+  if (msg.type === 'bonus') {
+    tokens = msg.tokens; bumpTokens(); updateDisplay();
+    if (!spinning) setMessage(`+${msg.amount.toLocaleString()} hourly bonus!`, 'win');
     return;
   }
 
   if (msg.type === 'slots:result') {
     const resolve = pendingSpins.get(msg.machineNum);
     if (resolve) { pendingSpins.delete(msg.machineNum); resolve(msg); }
+    return;
+  }
+
+  if (msg.type === 'ws-closed') {
+    wsReady = false;
+    if (myPlayerId) setMessage('Connection lost — refresh to reconnect.', 'neutral');
     return;
   }
 
@@ -70,9 +83,7 @@ ws.addEventListener('message', (e) => {
   }
 });
 
-ws.addEventListener('close', () => { if (myPlayerId) setMessage('Connection lost — refresh to reconnect.', 'neutral'); });
-
-function sendWS(obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
+function sendWS(obj) { if (wsReady) worker.port.postMessage({ type: 'ws-send', data: obj }); }
 
 // ── Display ────────────────────────────────────────────────────────
 function updateDisplay() {
@@ -81,9 +92,9 @@ function updateDisplay() {
   const noTokens = document.getElementById('noTokens');
   const cost = bet * machines.length;
   spinBtn.textContent = machines.length > 1 ? `SPIN ALL · ${cost}` : 'SPIN';
-  if (tokens <= 0) { spinBtn.style.display = 'none'; noTokens.style.display = 'block'; }
-  else if (tokens < cost) { spinBtn.disabled = true; spinBtn.style.display = 'block'; noTokens.style.display = 'none'; }
-  else { spinBtn.disabled = false; spinBtn.style.display = 'block'; noTokens.style.display = 'none'; }
+  if (tokens <= 0) { spinBtn.classList.add('hidden'); noTokens.classList.remove('hidden'); }
+  else if (tokens < cost) { spinBtn.disabled = true; spinBtn.classList.remove('hidden'); noTokens.classList.add('hidden'); }
+  else { spinBtn.disabled = false; spinBtn.classList.remove('hidden'); noTokens.classList.add('hidden'); }
   machines.forEach(m => {
     const btn = document.getElementById(`slot-${m.id}-spinbtn`);
     if (btn) btn.disabled = spinning || m.spinning || tokens < bet;

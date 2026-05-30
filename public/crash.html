@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🚀 Crash</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/crash.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +12,7 @@
 
 <div class="loading-screen" id="loadingScreen">Connecting...</div>
 
-<div class="app-wrapper" id="gameUI" style="display:none">
+<div class="app-wrapper hidden" id="gameUI">
 
   <!-- Header -->
   <div class="game-header">
@@ -60,14 +61,14 @@
 
   <!-- Action -->
   <div class="action-bar" id="actionBar"></div>
-  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+  <div class="no-tokens-msg hidden" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
 
   <!-- Rules -->
   <div class="rules-strip">
-    <div class="rule"><span style="color:#00D4FF">Bet & Launch</span>Multiplier climbs from 1×</div>
-    <div class="rule"><span style="color:#00FF87">Cash Out</span>Collect bet × multiplier</div>
-    <div class="rule"><span style="color:#FF4500">Crash</span>Lose your entire bet</div>
-    <div class="rule"><span style="color:#888">House edge</span>~1% · Crash at any time</div>
+    <div class="rule"><span class="c-blue">Bet & Launch</span>Multiplier climbs from 1×</div>
+    <div class="rule"><span class="c-green">Cash Out</span>Collect bet × multiplier</div>
+    <div class="rule"><span class="c-orange">Crash</span>Lose your entire bet</div>
+    <div class="rule"><span class="c-dim">House edge</span>~1% · Crash at any time</div>
   </div>
 
 </div>

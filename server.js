@@ -16,7 +16,7 @@ const MIME = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript
 const CSP = [
   "default-src 'none'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "style-src 'self' https://fonts.googleapis.com",
   "font-src https://fonts.gstatic.com",
   "connect-src 'self'",
   "img-src 'self'",
@@ -30,6 +30,10 @@ const CSP = [
 const server = http.createServer((req, res) => {
   const url      = req.url.split('?')[0];
   const filePath = path.join(DIR, url === '/' ? 'index.html' : url);
+  const relative = path.relative(DIR, filePath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    res.writeHead(403); res.end('Forbidden'); return;
+  }
   const ext      = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found'); return; }

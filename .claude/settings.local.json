@@ -9,7 +9,11 @@
       "Bash(node *)",
       "PowerShell(New-Item *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Recurse -Force)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(Format-Table -AutoSize)"
     ]
   }
 }

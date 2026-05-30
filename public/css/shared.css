@@ -1,0 +1,14 @@
+/* Shared utility classes used across all pages */
+
+.hidden { display: none !important; }
+
+/* Rule-label colours used in game info strips */
+.c-dim    { color: #888888; }
+.c-dark   { color: #2a2a3a; }
+.c-gold   { color: #FFD700; }
+.c-green  { color: #00FF87; }
+.c-blue   { color: #00D4FF; }
+.c-mine   { color: #FF3B3B; }
+.c-orange { color: #FF4500; }
+.c-amber  { color: #FF9500; }
+.c-pink   { color: #FF2D8B; }

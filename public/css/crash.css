@@ -207,7 +207,7 @@ body::before {
 .btn-cashout:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,255,135,0.3); }
 .no-tokens-msg {
   width: 100%; text-align: center; padding: 14px; color: var(--crash-hi); font-size: 12px; letter-spacing: 1px;
-  background: rgba(255,69,0,0.05); border: 1px solid rgba(255,69,0,0.15); border-radius: 10px; display: none;
+  background: rgba(255,69,0,0.05); border: 1px solid rgba(255,69,0,0.15); border-radius: 10px;
 }
 
 /* ── RULES STRIP ─────────────────────────────────────────────────── */

@@ -106,7 +106,7 @@ body::before {
 .card-suit-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; line-height: 1; }
 .card-rank-bot { position: absolute; bottom: 5px; right: 6px; font-size: 15px; font-weight: 700; line-height: 1; transform: rotate(180deg); }
 .card-suit-bot { position: absolute; bottom: 20px; right: 7px; font-size: 12px; line-height: 1; transform: rotate(180deg); }
-.card.hidden {
+.card.face-down {
   background: repeating-linear-gradient(135deg, #1a237e 0px, #1a237e 4px, #283593 4px, #283593 8px);
   border: 1px solid #3949ab;
 }
@@ -172,7 +172,7 @@ body::before {
 .btn-deal:disabled { background: #1e1e2a; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
 .no-tokens-msg {
   width: 100%; text-align: center; padding: 14px; color: var(--red); font-size: 12px; letter-spacing: 1px;
-  background: rgba(255,45,85,0.05); border: 1px solid rgba(255,45,85,0.15); border-radius: 10px; display: none;
+  background: rgba(255,45,85,0.05); border: 1px solid rgba(255,45,85,0.15); border-radius: 10px;
 }
 .rules-strip {
   background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px;

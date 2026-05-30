@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🃏 Blackjack</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/blackjack.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +12,7 @@
 
 <div class="loading-screen" id="loadingScreen">Connecting...</div>
 
-<div class="app-wrapper" id="gameUI" style="display:none">
+<div class="app-wrapper hidden" id="gameUI">
 
   <!-- Header -->
   <div class="game-header">
@@ -70,7 +71,7 @@
     <!-- filled by JS -->
   </div>
 
-  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+  <div class="no-tokens-msg hidden" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
 
   <!-- Rules -->
   <div class="rules-strip">

@@ -11,37 +11,63 @@ for (let i = 0; i < 100; i++) {
   starsEl.appendChild(s);
 }
 
-// ── WebSocket ──────────────────────────────────────────────────────
-const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-const ws = new WebSocket(`${wsProto}://${location.host}`);
+// ── Shared WebSocket worker ────────────────────────────────────────
+if (sessionStorage.getItem('sessionToken')) {
+  document.getElementById('lobby').classList.add('hidden');
+}
 
-ws.addEventListener('open', () => {
-  const token = sessionStorage.getItem('sessionToken');
-  if (token) ws.send(JSON.stringify({ type: 'reconnect', token }));
-});
+const worker = new SharedWorker('/js/ws-worker.js');
+worker.port.start();
+worker.port.postMessage({ type: 'init', token: sessionStorage.getItem('sessionToken') });
+let wsReady = false, sessionReady = false;
 
-ws.addEventListener('message', (e) => {
-  const msg = JSON.parse(e.data);
+worker.port.addEventListener('message', ({ data: msg }) => {
+  if (msg.type === 'ws-open')   { wsReady = true;  return; }
+  if (msg.type === 'ws-closed') { wsReady = false; return; }
 
   if (msg.type === 'joined') {
+    wsReady = true;
     sessionStorage.setItem('sessionToken', msg.sessionToken);
     document.getElementById('hubPlayerName').textContent = msg.name;
     document.getElementById('hubTokens').textContent = msg.tokens;
-    document.getElementById('lobby').classList.add('hidden');
-    document.getElementById('hub').style.display = '';
+    if (!sessionReady) {
+      sessionReady = true;
+      document.getElementById('lobby').classList.add('hidden');
+      document.getElementById('hub').classList.remove('hidden');
+    }
     return;
   }
 
   if (msg.type === 'authError') {
+    sessionReady = false;
     document.getElementById('lobbyError').textContent = msg.reason;
     document.getElementById('lobby').classList.remove('hidden');
-    document.getElementById('hub').style.display = 'none';
+    document.getElementById('hub').classList.add('hidden');
     sessionStorage.removeItem('sessionToken');
+    return;
+  }
+
+  if (msg.type === 'loggedOut') {
+    sessionReady = false;
+    worker.port.postMessage({ type: 'clear-token' });
+    sessionStorage.removeItem('sessionToken');
+    document.getElementById('hub').classList.add('hidden');
+    document.getElementById('lobby').classList.remove('hidden');
+    document.getElementById('lobbyError').textContent = '';
+    document.getElementById('nameInput').value = '';
+    document.getElementById('passwordInput').value = '';
     return;
   }
 
   if (msg.type === 'tokens') {
     document.getElementById('hubTokens').textContent = msg.value;
+    const el = document.getElementById('hubTokens');
+    el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+    return;
+  }
+
+  if (msg.type === 'bonus') {
+    document.getElementById('hubTokens').textContent = msg.tokens;
     const el = document.getElementById('hubTokens');
     el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
     return;
@@ -67,16 +93,19 @@ function submitLobby() {
     return;
   }
   document.getElementById('lobbyError').textContent = '';
-  if (ws.readyState !== WebSocket.OPEN) {
+  if (!wsReady) {
     document.getElementById('lobbyError').textContent = 'Not connected — try again.';
     return;
   }
-  ws.send(JSON.stringify({ type: lobbyMode, name, password: pass }));
+  worker.port.postMessage({ type: 'ws-send', data: { type: lobbyMode, name, password: pass } });
 }
 
-// ── Event listeners (replaces inline onclick/onkeydown) ────────────
+// ── Event listeners ────────────────────────────────────────────────
 document.getElementById('tabRegister').addEventListener('click', () => switchTab('register'));
 document.getElementById('tabLogin').addEventListener('click', () => switchTab('login'));
 document.getElementById('lobbySubmitBtn').addEventListener('click', submitLobby);
 document.getElementById('nameInput').addEventListener('keydown',     e => { if (e.key === 'Enter') submitLobby(); });
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitLobby(); });
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (wsReady) worker.port.postMessage({ type: 'ws-send', data: { type: 'logout' } });
+});

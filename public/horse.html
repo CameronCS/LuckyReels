@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🏇 Horse Racing</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/horse.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -11,10 +12,10 @@
 
 <div class="loading-screen" id="loadingScreen">CONNECTING...</div>
 
-<div class="app-wrapper" id="gameUI" style="display:none">
+<div class="app-wrapper hidden" id="gameUI">
 
   <div class="game-header">
-    <a class="back-btn" href="/">← LOBBY</a>
+    <a class="back-btn" href="/">← Hub</a>
     <div class="header-center">
       <h1>Horse Racing</h1>
       <p class="tagline">6 Horses · Pick One · Winner Pays 4×</p>
@@ -48,7 +49,7 @@
         <button class="chip" data-val="50">50</button>
         <button class="chip" data-val="100">100</button>
         <button class="chip chip-custom" id="customChipBtn">CUSTOM</button>
-        <input type="number" id="customChipInput" class="custom-chip-input" min="1" max="999999" placeholder="amount" style="display:none">
+        <input type="number" id="customChipInput" class="custom-chip-input hidden" min="1" max="999999" placeholder="amount">
       </div>
       <div class="action-row">
         <div class="bet-display">BET <span id="betDisplay">10</span></div>
@@ -57,7 +58,7 @@
     </div>
   </div>
 
-  <div class="no-tokens-msg" id="noTokensMsg" style="display:none">
+  <div class="no-tokens-msg hidden" id="noTokensMsg">
     ⛔ Out of tokens — ask the admin to top you up.
   </div>
 
