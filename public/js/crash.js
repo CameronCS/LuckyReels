@@ -1,5 +1,5 @@
 'use strict';
-let tokens = 0, bet = 1, autoCashout = null;
+let tokens = 0, bet = 50, autoCashout = null;
 let gameState = 'idle'; // 'idle' | 'playing' | 'ended'
 let gameStartTime = null;   // performance.now() reference
 let serverStartTime = null; // Date.now() value from server
@@ -292,7 +292,7 @@ document.querySelectorAll('.bet-btn[data-val]').forEach(btn => {
 document.getElementById('betCustom').addEventListener('input', function () {
   if (gameState !== 'idle') return;
   const val = parseInt(this.value);
-  if (val && val > 0) {
+  if (val && val >= 10) {
     bet = val;
     document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('betDisplay').textContent = bet;
