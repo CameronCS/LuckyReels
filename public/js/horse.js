@@ -25,25 +25,26 @@ let finishOrder   = [];
 let winnerIdx     = -1;
 let framesAfterWin = 0;
 
-const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
-const ws = new WebSocket(`${wsProto}://${location.host}`);
+const worker = new SharedWorker('/js/ws-worker.js');
+worker.port.start();
+worker.port.postMessage({ type: 'init', token: sessionStorage.getItem('sessionToken') });
+let wsReady = false, sessionReady = false;
 
-ws.addEventListener('open', () => {
-  const token = sessionStorage.getItem('sessionToken');
-  if (!token) { window.location.href = '/'; return; }
-  ws.send(JSON.stringify({ type: 'reconnect', token }));
-});
-
-ws.addEventListener('message', e => {
-  const msg = JSON.parse(e.data);
+worker.port.addEventListener('message', ({ data: msg }) => {
+  if (msg.type === 'ws-open')   { wsReady = true;  return; }
+  if (msg.type === 'ws-closed') { wsReady = false; return; }
   if (msg.type === 'joined') {
     sessionStorage.setItem('sessionToken', msg.sessionToken);
+    wsReady = true;
     myPlayerId = msg.playerId;
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
-    document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').classList.remove('hidden');
-    buildUI();
+    if (!sessionReady) {
+      sessionReady = true;
+      document.getElementById('loadingScreen').classList.add('hidden');
+      document.getElementById('gameUI').classList.remove('hidden');
+      buildUI();
+    }
     updateTokenDisplay();
     return;
   }
@@ -65,7 +66,7 @@ ws.addEventListener('message', e => {
   }
 });
 
-function sendWS(obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj)); }
+function sendWS(obj) { if (wsReady) worker.port.postMessage({ type: 'ws-send', data: obj }); }
 
 function updateTokenDisplay() {
   document.getElementById('tokenCount').textContent = tokens;
