@@ -7,7 +7,9 @@
       "Bash(Select-Object Name, PSIsContainer)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Recurse | Where-Object { $_.FullName -notmatch \"node_modules\" } | Select-Object FullName)",
       "Bash(node *)",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Recurse -Force)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

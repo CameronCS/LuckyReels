@@ -1,0 +1,258 @@
+:root {
+  --gold: #FFD700; --gold2: #FFA500;
+  --dark: #0a0a0f; --panel: #12121a; --deep: #080810;
+  --border: #2a2a3a; --green: #00FF87; --text: #e8e8f0;
+  --mine-col: #FF3B3B;
+  --gem-col:  #00D4FF;
+  --accent:   #FF9500;
+  --purple:   #c688ff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--dark); color: var(--text);
+  font-family: 'Space Mono', monospace;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  overflow-x: hidden; padding-bottom: 48px;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 20%, rgba(255,59,59,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 80%, rgba(0,212,255,0.04) 0%, transparent 55%);
+  pointer-events: none; z-index: 0;
+}
+.loading-screen {
+  position: fixed; inset: 0; background: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200; font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 6px; color: #444;
+}
+.loading-screen.hidden { display: none; }
+.app-wrapper {
+  width: min(580px, 100%); display: flex; flex-direction: column; gap: 12px;
+  position: relative; z-index: 1; padding: 20px 16px;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────── */
+.game-header {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 18px; padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; position: relative; overflow: hidden;
+}
+.game-header::before {
+  content: ''; position: absolute; top: 0; left: 15%; right: 15%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.back-btn {
+  background: transparent; border: 1px solid var(--border); color: #555;
+  font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  padding: 6px 14px; border-radius: 8px; cursor: pointer; text-decoration: none;
+  transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.back-btn:hover { border-color: var(--accent); color: var(--accent); }
+.header-center { text-align: center; flex: 1; }
+.header-center h1 {
+  font-family: 'Bebas Neue', cursive; font-size: 36px; letter-spacing: 6px;
+  background: linear-gradient(135deg, var(--mine-col), var(--accent), var(--gem-col));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1;
+}
+.header-center .tagline { font-size: 9px; color: #444; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+.header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.player-pill {
+  background: #0d0d14; border: 1px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-size: 11px; color: var(--accent); letter-spacing: 1px; white-space: nowrap;
+}
+.tokens-box { text-align: right; }
+.tokens-box-label { font-size: 9px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2px; }
+.tokens-value { font-family: 'Bebas Neue', cursive; font-size: 36px; color: var(--gold); letter-spacing: 2px; line-height: 1; }
+.tokens-value.bump { animation: bump 0.3s ease; }
+@keyframes bump { 50% { transform: scale(1.15); color: var(--green); } }
+
+/* ── MINES PANEL ─────────────────────────────────────────────────── */
+.mines-panel {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 20px; padding: 20px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* ── MINE COUNT SELECTOR ─────────────────────────────────────────── */
+.mines-count-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.mines-count-bar.hidden { display: none; }
+.mc-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; }
+.mc-btn {
+  background: #0d0d14; border: 1px solid var(--border); color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 12px;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: all 0.12s;
+}
+.mc-btn:hover  { border-color: var(--mine-col); color: var(--mine-col); }
+.mc-btn.active { border-color: var(--mine-col); background: rgba(255,59,59,0.1); color: var(--mine-col); }
+
+/* ── RESULT BANNER ───────────────────────────────────────────────── */
+.result-banner {
+  text-align: center; font-family: 'Bebas Neue', cursive; font-size: 28px; letter-spacing: 4px;
+  min-height: 0; overflow: hidden; transition: all 0.3s; border-radius: 12px; padding: 0;
+}
+.result-banner.banner-win {
+  color: var(--gem-col); text-shadow: 0 0 24px rgba(0,212,255,0.5);
+  background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.2);
+  padding: 14px;
+}
+.result-banner.banner-lose {
+  color: var(--mine-col); text-shadow: 0 0 24px rgba(255,59,59,0.5);
+  background: rgba(255,59,59,0.06); border: 1px solid rgba(255,59,59,0.2);
+  padding: 14px;
+}
+
+/* ── GRID ────────────────────────────────────────────────────────── */
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.mine-cell {
+  aspect-ratio: 1;
+  background: #0d0d18;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: default;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  user-select: none;
+  transition: transform 0.12s, border-color 0.12s, background 0.12s, box-shadow 0.12s;
+  position: relative; overflow: hidden;
+}
+.mines-grid.playing .mine-cell:not(.safe):not(.mine) {
+  cursor: pointer;
+}
+.mines-grid.playing .mine-cell:not(.safe):not(.mine):hover {
+  border-color: var(--accent);
+  background: rgba(255,149,0,0.07);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255,149,0,0.18);
+}
+.mine-cell.safe {
+  background: rgba(0,212,255,0.1);
+  border-color: var(--gem-col);
+  box-shadow: 0 0 14px rgba(0,212,255,0.15);
+  cursor: default;
+  animation: gemReveal 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+.mine-cell.mine {
+  background: rgba(255,59,59,0.1);
+  border-color: var(--mine-col);
+  box-shadow: 0 0 14px rgba(255,59,59,0.15);
+  cursor: default;
+  animation: mineReveal 0.3s ease;
+}
+.mine-cell.mine.clicked {
+  background: rgba(255,59,59,0.25);
+  box-shadow: 0 0 28px rgba(255,59,59,0.45);
+  animation: mineExplode 0.5s ease;
+}
+@keyframes gemReveal {
+  from { transform: scale(0.2) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes mineReveal {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes mineExplode {
+  0%   { transform: scale(1.4); }
+  40%  { transform: scale(0.85); }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* ── GAME STATUS ─────────────────────────────────────────────────── */
+.game-status {
+  display: flex; align-items: center; justify-content: space-around;
+  background: #0d0d18; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px;
+}
+.game-status.hidden { display: none; }
+.status-col { text-align: center; }
+.status-label { font-size: 9px; color: #555; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
+.status-val { font-family: 'Bebas Neue', cursive; font-size: 24px; letter-spacing: 2px; line-height: 1; }
+.status-val.gold  { color: var(--gold); }
+.status-val.green { color: var(--green); }
+.status-val.red   { color: var(--mine-col); }
+.status-divider { width: 1px; height: 36px; background: var(--border); }
+
+/* ── BET CONTROLS ────────────────────────────────────────────────── */
+.controls-bar {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px 20px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.controls-bar.hidden { display: none; }
+.bet-label { font-size: 10px; color: #555; letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; }
+.bet-btn {
+  background: #0d0d14; border: 1px solid var(--border); color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 12px;
+  padding: 5px 11px; border-radius: 6px; cursor: pointer; transition: all 0.12s;
+}
+.bet-btn:hover  { border-color: var(--gold); color: var(--gold); }
+.bet-btn.active { border-color: var(--gold); background: rgba(255,215,0,0.08); color: var(--gold); }
+.bet-custom {
+  background: #0d0d14; border: 1px solid var(--border); color: var(--text);
+  font-family: 'Space Mono', monospace; font-size: 12px;
+  padding: 5px 10px; border-radius: 6px; outline: none; width: 68px; transition: border-color 0.2s;
+}
+.bet-custom:focus { border-color: var(--gold); }
+.bet-custom::placeholder { color: #444; font-size: 10px; }
+.current-bet-display { margin-left: auto; flex-shrink: 0; font-size: 10px; color: #555; letter-spacing: 2px; }
+.current-bet-display span { color: var(--gold); font-size: 13px; }
+
+/* ── ACTION BAR ──────────────────────────────────────────────────── */
+.action-bar { display: flex; gap: 10px; }
+.btn-start {
+  flex: 1; padding: 16px; font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 5px;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  color: #0a0a0f; border: none; border-radius: 12px; cursor: pointer; transition: all 0.18s;
+  position: relative; overflow: hidden;
+}
+.btn-start::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%); transition: transform 0.4s;
+}
+.btn-start:hover::before { transform: translateX(100%); }
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,165,0,0.3); }
+.btn-start:disabled { background: #1e1e2a; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-cashout {
+  flex: 1; padding: 16px; font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 5px;
+  background: linear-gradient(135deg, #007a47, var(--green));
+  color: #0a0a0f; border: none; border-radius: 12px; cursor: pointer; transition: all 0.18s;
+  position: relative; overflow: hidden;
+}
+.btn-cashout::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%); transition: transform 0.4s;
+}
+.btn-cashout:hover::before { transform: translateX(100%); }
+.btn-cashout:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,255,135,0.3); }
+.btn-cashout:disabled { background: #1e1e2a; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
+.no-tokens-msg {
+  width: 100%; text-align: center; padding: 14px; color: var(--mine-col); font-size: 12px; letter-spacing: 1px;
+  background: rgba(255,59,59,0.05); border: 1px solid rgba(255,59,59,0.15); border-radius: 10px; display: none;
+}
+
+/* ── RULES STRIP ─────────────────────────────────────────────────── */
+.rules-strip {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 20px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+}
+.rule { font-size: 10px; color: #444; letter-spacing: 1px; text-align: center; }
+.rule span { display: block; font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+
+@media (max-width: 500px) {
+  .game-header { flex-wrap: wrap; padding: 14px 16px; }
+  .header-center h1 { font-size: 28px; }
+  .player-pill { display: none; }
+  .mine-cell { font-size: 20px; }
+  .mines-grid { gap: 5px; }
+  .status-val { font-size: 20px; }
+}
