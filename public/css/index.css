@@ -280,6 +280,7 @@ body::before {
 .game-card.baccarat::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
 .game-card.mines::before   { background: linear-gradient(90deg, transparent, #FF9500, transparent); }
 .game-card.crash::before   { background: linear-gradient(90deg, transparent, #FF4500, transparent); }
+.game-card.plinko::before  { background: linear-gradient(90deg, transparent, #FF2D8B, transparent); }
 .game-card:hover { transform: translateY(-4px); border-color: #444; }
 .game-card.slots:hover    { border-color: rgba(255,215,0,0.4);   box-shadow: 0 8px 32px rgba(255,215,0,0.08); }
 .game-card.bj:hover       { border-color: rgba(10,245,245,0.4);  box-shadow: 0 8px 32px rgba(10,245,245,0.08); }
@@ -288,6 +289,7 @@ body::before {
 .game-card.baccarat:hover { border-color: rgba(198,136,255,0.4); box-shadow: 0 8px 32px rgba(198,136,255,0.08); }
 .game-card.mines:hover    { border-color: rgba(255,149,0,0.4);   box-shadow: 0 8px 32px rgba(255,149,0,0.08); }
 .game-card.crash:hover    { border-color: rgba(255,69,0,0.4);    box-shadow: 0 8px 32px rgba(255,69,0,0.08); }
+.game-card.plinko:hover   { border-color: rgba(255,45,139,0.4);  box-shadow: 0 8px 32px rgba(255,45,139,0.08); }
 .game-card::before { opacity: 1; }
 
 .game-icon {
@@ -309,6 +311,7 @@ body::before {
 .game-card.baccarat .game-name { color: var(--purple); }
 .game-card.mines    .game-name { color: #FF9500; }
 .game-card.crash    .game-name { color: #FF4500; }
+.game-card.plinko   .game-name { color: #FF2D8B; }
 
 .game-desc {
   font-size: 10px;
@@ -363,6 +366,11 @@ body::before {
   background: rgba(255,69,0,0.1);
   color: #FF4500;
   border: 1px solid rgba(255,69,0,0.3);
+}
+.game-card.plinko .game-play-btn {
+  background: rgba(255,45,139,0.1);
+  color: #FF2D8B;
+  border: 1px solid rgba(255,45,139,0.3);
 }
 .game-card:hover .game-play-btn { transform: scale(1.04); }
 

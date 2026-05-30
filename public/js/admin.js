@@ -67,6 +67,11 @@ ws.addEventListener('message', (e) => {
     pushGameEvent(playerId, { game: 'crash', bet, crashPoint, cashoutMult, net, outcome, time: new Date().toLocaleTimeString() });
     return;
   }
+  if (msg.type === 'plinkoEvent') {
+    const { playerId, bet, risk, slot, mult, net } = msg;
+    pushGameEvent(playerId, { game: 'plinko', bet, risk, slot, mult, net, time: new Date().toLocaleTimeString() });
+    return;
+  }
 
   if (msg.type === 'createAdmin:ok') {
     document.getElementById('newAdminUsername').value = '';
@@ -384,6 +389,9 @@ function buildFilterPills(playerId) {
   const hasCrash = logs.some(l => l.game === 'crash');
   if (hasCrash)
     pills.push(`<button class="filter-pill ${active === 'crash' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="crash">🚀 Crash</button>`);
+  const hasPlinko = logs.some(l => l.game === 'plinko');
+  if (hasPlinko)
+    pills.push(`<button class="filter-pill ${active === 'plinko' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="plinko">🎯 Plinko</button>`);
   machines.forEach(n =>
     pills.push(`<button class="filter-pill ${active === n ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="${n}">M${n}</button>`)
   );
@@ -409,6 +417,7 @@ function buildLogEntries(playerId) {
   else if (filter === 'baccarat')  entries = all.filter(e => e.game === 'baccarat');
   else if (filter === 'mines')     entries = all.filter(e => e.game === 'mines');
   else if (filter === 'crash')     entries = all.filter(e => e.game === 'crash');
+  else if (filter === 'plinko')    entries = all.filter(e => e.game === 'plinko');
   else                             entries = all.filter(e => e.game === 'slots' && e.machineNum === filter);
 
   if (entries.length === 0) {
@@ -468,6 +477,17 @@ function buildLogEntries(playerId) {
         <span class="spin-icon">${icon}</span>
         <span class="spin-machine" style="color:#FF9500;font-size:8px">MN</span>
         <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${e.mineCount} mines · ${e.cellsRevealed} safe</span>
+        <span class="spin-amount ${amtClass}">${amtText}</span>
+        <span class="spin-time">${e.time}</span></div>`;
+    }
+    if (e.game === 'plinko') {
+      const amtClass = e.net > 0 ? 'pos' : e.net < 0 ? 'neg' : '';
+      const amtText  = e.net > 0 ? `+${e.net}` : `−${Math.abs(e.net)}`;
+      const icon     = e.net > 0 ? '🎯' : '·';
+      return `<div class="spin-entry">
+        <span class="spin-icon">${icon}</span>
+        <span class="spin-machine" style="color:#FF2D8B;font-size:8px">PL</span>
+        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.risk)} · slot ${e.slot} · ${e.mult}×</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
