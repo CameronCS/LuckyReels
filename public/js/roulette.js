@@ -23,7 +23,7 @@ ws.addEventListener('message', e => {
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
+    document.getElementById('gameUI').classList.remove('hidden');
     buildTable();
     initControls();
     updateTokenDisplay();
@@ -51,7 +51,7 @@ function sendWS(obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.string
 
 function updateTokenDisplay() {
   document.getElementById('tokenCount').textContent = tokens;
-  document.getElementById('noTokensMsg').style.display = tokens <= 0 ? '' : 'none';
+  document.getElementById('noTokensMsg').classList.toggle('hidden', tokens > 0);
 }
 function bumpTokens() {
   const el = document.getElementById('tokenCount');
@@ -338,7 +338,7 @@ function initControls() {
     btn.addEventListener('click', () => {
       selectedChip = parseInt(btn.dataset.val);
       setActiveChip(btn);
-      document.getElementById('customChipInput').style.display = 'none';
+      document.getElementById('customChipInput').classList.add('hidden');
     });
   });
 
@@ -347,7 +347,7 @@ function initControls() {
 
   customBtn.addEventListener('click', () => {
     setActiveChip(customBtn);
-    customInput.style.display = '';
+    customInput.classList.remove('hidden');
     customInput.focus(); customInput.select();
   });
 

@@ -157,7 +157,7 @@ body::before {
 .btn-drop:disabled { background: #1e1e2a; color: #444; cursor: not-allowed; transform: none; box-shadow: none; }
 .no-tokens-msg {
   width: 100%; text-align: center; padding: 14px; color: var(--plinko); font-size: 12px; letter-spacing: 1px;
-  background: rgba(255,45,139,0.05); border: 1px solid rgba(255,45,139,0.15); border-radius: 10px; display: none;
+  background: rgba(255,45,139,0.05); border: 1px solid rgba(255,45,139,0.15); border-radius: 10px;
 }
 
 /* ── RULES STRIP ─────────────────────────────────────────────────── */

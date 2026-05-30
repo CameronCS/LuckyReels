@@ -42,7 +42,7 @@ ws.addEventListener('message', e => {
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
+    document.getElementById('gameUI').classList.remove('hidden');
     buildUI();
     updateTokenDisplay();
     return;
@@ -69,7 +69,7 @@ function sendWS(obj) { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.string
 
 function updateTokenDisplay() {
   document.getElementById('tokenCount').textContent = tokens;
-  document.getElementById('noTokensMsg').style.display = tokens <= 0 ? '' : 'none';
+  document.getElementById('noTokensMsg').classList.toggle('hidden', tokens > 0);
 }
 function bumpTokens() {
   const el = document.getElementById('tokenCount');
@@ -214,7 +214,7 @@ function buildTrack() {
     lane.className = 'lane'; lane.id = `lane-${i}`;
     lane.innerHTML = `
       <div class="lane-label">
-        <span class="lane-num" style="color:${horse.color}">${i + 1}</span>
+        <span class="lane-num horse-color-${i}">${i + 1}</span>
         <span class="lane-name" id="lname-${i}">${horse.name}</span>
       </div>
       <div class="track-strip">
@@ -231,7 +231,7 @@ function buildHorseCards() {
     const card = document.createElement('div');
     card.className = 'horse-card'; card.id = `hcard-${i}`;
     card.innerHTML = `
-      <div class="horse-badge" style="background:${horse.color}">${i + 1}</div>
+      <div class="horse-badge horse-bg-${i}">${i + 1}</div>
       <div class="horse-card-info">
         <div class="horse-card-name">${horse.name}</div>
         <div class="horse-card-payout">Pays ${PAYOUT_MULT}×</div>
@@ -273,7 +273,7 @@ function buildBetControls() {
       selectedChip = parseInt(btn.dataset.val);
       bet = selectedChip;
       setActiveChip(btn);
-      document.getElementById('customChipInput').style.display = 'none';
+      document.getElementById('customChipInput').classList.add('hidden');
       document.getElementById('betDisplay').textContent = bet;
     });
   });
@@ -283,7 +283,7 @@ function buildBetControls() {
 
   customBtn.addEventListener('click', () => {
     setActiveChip(customBtn);
-    customInput.style.display = '';
+    customInput.classList.remove('hidden');
     customInput.focus(); customInput.select();
   });
 

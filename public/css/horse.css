@@ -4,6 +4,21 @@
     --border: #2a2a3a; --green: #00FF87; --blue: #0AF5F5; --text: #e8e8f0;
     --turf: #071408;
   }
+  /* Horse lane number colours — must match HORSES array order in horse.js */
+  .horse-color-0 { color: #FFD700; }
+  .horse-color-1 { color: #00FF87; }
+  .horse-color-2 { color: #0AF5F5; }
+  .horse-color-3 { color: #FF4455; }
+  .horse-color-4 { color: #bb88ff; }
+  .horse-color-5 { color: #cccccc; }
+
+  .horse-bg-0 { background: #FFD700; }
+  .horse-bg-1 { background: #00FF87; }
+  .horse-bg-2 { background: #0AF5F5; }
+  .horse-bg-3 { background: #FF4455; }
+  .horse-bg-4 { background: #bb88ff; }
+  .horse-bg-5 { background: #cccccc; }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: var(--dark); color: var(--text);

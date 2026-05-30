@@ -27,8 +27,8 @@ async function main() {
     process.exit(1);
   }
 
-  if (adminPass.length < 6) {
-    console.error('Admin password must be at least 6 characters.');
+  if (adminPass.length < 12) {
+    console.error('Admin password must be at least 12 characters.');
     process.exit(1);
   }
 
@@ -192,10 +192,16 @@ async function main() {
       token      CHAR(36)  NOT NULL PRIMARY KEY,
       player_id  CHAR(36)  NOT NULL,
       created_at DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME  NOT NULL,
       KEY idx_sess_player (player_id),
       CONSTRAINT fk_sess_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
     ) ENGINE=InnoDB;
   `);
+
+  // Migration: add expires_at for existing installs (silently ignored if already present)
+  await con.query(`
+    ALTER TABLE sessions ADD COLUMN expires_at DATETIME NOT NULL DEFAULT '2099-12-31 00:00:00'
+  `).catch(() => {});
 
   await con.query(`
     CREATE TABLE IF NOT EXISTS admin_logs (

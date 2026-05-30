@@ -658,6 +658,28 @@
   /* ─────────────────────────────────────
      RESPONSIVE
   ───────────────────────────────────── */
+  /* ─────────────────────────────────────
+     LOG TOGGLE INNER GROUP
+  ───────────────────────────────────── */
+  .log-toggle-right { display: flex; align-items: center; gap: 6px; }
+
+  /* ─────────────────────────────────────
+     GAME BADGE COLOURS (activity log)
+  ───────────────────────────────────── */
+  .spin-machine-hr  { color: #00FF87; font-size: 8px; }
+  .spin-machine-rl  { color: #FF2D55; font-size: 8px; }
+  .spin-machine-bj  { color: #0AF5F5; font-size: 8px; }
+  .spin-machine-bac { color: #c688ff; font-size: 8px; }
+  .spin-machine-mn  { color: #FF9500; font-size: 8px; }
+  .spin-machine-pl  { color: #FF2D8B; font-size: 8px; }
+  .spin-machine-cr  { color: #FF4500; font-size: 8px; }
+
+  /* ─────────────────────────────────────
+     SPIN SYMBOLS SIZE VARIANTS
+  ───────────────────────────────────── */
+  .spin-symbols-sm { font-size: 10px; letter-spacing: 1px; }
+  .spin-symbols-md { font-size: 11px; letter-spacing: 1px; }
+
   @media (max-width: 480px) {
     .admin-header { padding: 16px; }
     .admin-header h1 { font-size: 32px; }

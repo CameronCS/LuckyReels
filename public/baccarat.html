@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🎴 Baccarat</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/baccarat.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +12,7 @@
 
 <div class="loading-screen" id="loadingScreen">Connecting...</div>
 
-<div class="app-wrapper" id="gameUI" style="display:none">
+<div class="app-wrapper hidden" id="gameUI">
 
   <!-- Header -->
   <div class="game-header">
@@ -83,15 +84,15 @@
 
   <!-- Action -->
   <div class="action-bar" id="actionBar"></div>
-  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+  <div class="no-tokens-msg hidden" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
 
   <!-- Rules -->
   <div class="rules-strip">
     <div class="rule"><span class="player">Player</span>pays 1:1</div>
     <div class="rule"><span class="banker">Banker</span>pays 0.95:1</div>
     <div class="rule"><span class="tie">Tie</span>pays 8:1</div>
-    <div class="rule"><span style="color:#888">Push</span>Tie returns P/B bets</div>
-    <div class="rule"><span style="color:#888">Natural</span>8 or 9 on initial deal</div>
+    <div class="rule"><span class="c-dim">Push</span>Tie returns P/B bets</div>
+    <div class="rule"><span class="c-dim">Natural</span>8 or 9 on initial deal</div>
   </div>
 
 </div>

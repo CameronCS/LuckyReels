@@ -23,7 +23,7 @@ ws.addEventListener('message', (e) => {
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
+    document.getElementById('gameUI').classList.remove('hidden');
     updateTokenDisplay();
     renderIdle();
     return;
@@ -238,10 +238,10 @@ function renderIdle() {
   const noTokens = document.getElementById('noTokensMsg');
   if (tokens <= 0) {
     bar.innerHTML = '';
-    noTokens.style.display = 'block';
+    noTokens.classList.remove('hidden');
     return;
   }
-  noTokens.style.display = 'none';
+  noTokens.classList.add('hidden');
   bar.innerHTML = '';
   const canAfford = tokens >= bet;
   const btn = document.createElement('button');

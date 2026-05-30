@@ -16,7 +16,7 @@ ws.addEventListener('message', (e) => {
 
   if (msg.type === 'adminAuthOk') {
     document.getElementById('adminLoginOverlay').classList.add('hidden');
-    document.getElementById('mainPanel').style.display = '';
+    document.getElementById('mainPanel').classList.remove('hidden');
     return;
   }
   if (msg.type === 'adminAuthError') {
@@ -280,12 +280,12 @@ function buildPlayerCard(p) {
   <button class="log-toggle-btn ${isOpen ? 'open' : ''}" id="logtoggle-${id}"
           data-action="toggleLog" data-player="${id}">
     <span>Activity Log</span>
-    <span style="display:flex;align-items:center;gap:6px">
+    <span class="log-toggle-right">
       ${logCount > 0 ? `<span class="log-toggle-count">${logCount}</span>` : ''}
       <span id="logtoggle-arrow-${id}">${isOpen ? '▴' : '▾'}</span>
     </span>
   </button>
-  <div class="card-log" id="cardlog-${id}" ${isOpen ? '' : 'style="display:none"'}>
+  <div class="card-log${isOpen ? '' : ' hidden'}" id="cardlog-${id}">
     <div class="machine-filters" id="filters-${id}">
       ${buildFilterPills(id)}
     </div>
@@ -326,12 +326,12 @@ function toggleLog(playerId) {
 
   if (isOpen) {
     expandedLogs.delete(playerId);
-    logEl.style.display = 'none';
+    logEl.classList.add('hidden');
     btn.classList.remove('open');
     if (arrow) arrow.textContent = '▾';
   } else {
     expandedLogs.add(playerId);
-    logEl.style.display = '';
+    logEl.classList.remove('hidden');
     btn.classList.add('open');
     if (arrow) arrow.textContent = '▴';
     renderPlayerLog(playerId);
@@ -432,8 +432,8 @@ function buildLogEntries(playerId) {
       const amtText  = e.net > 0 ? `+${e.net}` : `−${Math.abs(e.net)}`;
       return `<div class="spin-entry">
         <span class="spin-icon">${won ? '🏆' : '·'}</span>
-        <span class="spin-machine" style="color:#00FF87;font-size:8px">HR</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px"><strong>${escHtml(e.winnerName)}</strong> won · picked ${escHtml(e.pickedName)}</span>
+        <span class="spin-machine spin-machine-hr">HR</span>
+        <span class="spin-symbols spin-symbols-sm"><strong>${escHtml(e.winnerName)}</strong> won · picked ${escHtml(e.pickedName)}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -442,8 +442,8 @@ function buildLogEntries(playerId) {
       const amtText  = e.net > 0 ? `+${e.net}` : e.net < 0 ? `−${Math.abs(e.net)}` : 'Push';
       return `<div class="spin-entry">
         <span class="spin-icon">🎡</span>
-        <span class="spin-machine" style="color:#FF2D55;font-size:8px">RL</span>
-        <span class="spin-symbols" style="font-size:11px;letter-spacing:1px">Landed <strong>${escHtml(String(e.winNum))}</strong> · bet ${e.totalBet}</span>
+        <span class="spin-machine spin-machine-rl">RL</span>
+        <span class="spin-symbols spin-symbols-md">Landed <strong>${escHtml(String(e.winNum))}</strong> · bet ${e.totalBet}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -453,8 +453,8 @@ function buildLogEntries(playerId) {
       const amtText  = e.net > 0 ? `+${e.net}` : e.net < 0 ? `−${Math.abs(e.net)}` : 'Push';
       return `<div class="spin-entry">
         <span class="spin-icon">${icons[e.result] || '·'}</span>
-        <span class="spin-machine" style="color:#0AF5F5;font-size:8px">BJ</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.playerCards || '')} <span style="color:#444">vs</span> ${escHtml(e.dealerCards || '')}</span>
+        <span class="spin-machine spin-machine-bj">BJ</span>
+        <span class="spin-symbols spin-symbols-sm">${escHtml(e.playerCards || '')} <span class="c-dim">vs</span> ${escHtml(e.dealerCards || '')}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -464,8 +464,8 @@ function buildLogEntries(playerId) {
       const icon     = e.net > 0 ? '🎴' : e.net === 0 ? '🔵' : '❌';
       return `<div class="spin-entry">
         <span class="spin-icon">${icon}</span>
-        <span class="spin-machine" style="color:#c688ff;font-size:8px">BAC</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.betType)} · ${escHtml(e.outcome)}</span>
+        <span class="spin-machine spin-machine-bac">BAC</span>
+        <span class="spin-symbols spin-symbols-sm">${escHtml(e.betType)} · ${escHtml(e.outcome)}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -475,8 +475,8 @@ function buildLogEntries(playerId) {
       const icon     = e.outcome === 'cashed_out' ? '💎' : '💣';
       return `<div class="spin-entry">
         <span class="spin-icon">${icon}</span>
-        <span class="spin-machine" style="color:#FF9500;font-size:8px">MN</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${e.mineCount} mines · ${e.cellsRevealed} safe</span>
+        <span class="spin-machine spin-machine-mn">MN</span>
+        <span class="spin-symbols spin-symbols-sm">${e.mineCount} mines · ${e.cellsRevealed} safe</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -486,8 +486,8 @@ function buildLogEntries(playerId) {
       const icon     = e.net > 0 ? '🎯' : '·';
       return `<div class="spin-entry">
         <span class="spin-icon">${icon}</span>
-        <span class="spin-machine" style="color:#FF2D8B;font-size:8px">PL</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.risk)} · slot ${e.slot} · ${e.mult}×</span>
+        <span class="spin-machine spin-machine-pl">PL</span>
+        <span class="spin-symbols spin-symbols-sm">${escHtml(e.risk)} · slot ${e.slot} · ${e.mult}×</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -500,8 +500,8 @@ function buildLogEntries(playerId) {
         : `crashed ${e.crashPoint}×`;
       return `<div class="spin-entry">
         <span class="spin-icon">${icon}</span>
-        <span class="spin-machine" style="color:#FF4500;font-size:8px">CR</span>
-        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${detail}</span>
+        <span class="spin-machine spin-machine-cr">CR</span>
+        <span class="spin-symbols spin-symbols-sm">${detail}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
@@ -523,7 +523,7 @@ function updateLogToggleBtn(playerId) {
   const isOpen   = expandedLogs.has(playerId);
   btn.innerHTML = `
     <span>Activity Log</span>
-    <span style="display:flex;align-items:center;gap:6px">
+    <span class="log-toggle-right">
       ${logCount > 0 ? `<span class="log-toggle-count">${logCount}</span>` : ''}
       <span id="logtoggle-arrow-${playerId}">${isOpen ? '▴' : '▾'}</span>
     </span>`;

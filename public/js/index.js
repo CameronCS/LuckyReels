@@ -28,15 +28,25 @@ ws.addEventListener('message', (e) => {
     document.getElementById('hubPlayerName').textContent = msg.name;
     document.getElementById('hubTokens').textContent = msg.tokens;
     document.getElementById('lobby').classList.add('hidden');
-    document.getElementById('hub').style.display = '';
+    document.getElementById('hub').classList.remove('hidden');
     return;
   }
 
   if (msg.type === 'authError') {
     document.getElementById('lobbyError').textContent = msg.reason;
     document.getElementById('lobby').classList.remove('hidden');
-    document.getElementById('hub').style.display = 'none';
+    document.getElementById('hub').classList.add('hidden');
     sessionStorage.removeItem('sessionToken');
+    return;
+  }
+
+  if (msg.type === 'loggedOut') {
+    sessionStorage.removeItem('sessionToken');
+    document.getElementById('hub').classList.add('hidden');
+    document.getElementById('lobby').classList.remove('hidden');
+    document.getElementById('lobbyError').textContent = '';
+    document.getElementById('nameInput').value = '';
+    document.getElementById('passwordInput').value = '';
     return;
   }
 
@@ -80,3 +90,6 @@ document.getElementById('tabLogin').addEventListener('click', () => switchTab('l
 document.getElementById('lobbySubmitBtn').addEventListener('click', submitLobby);
 document.getElementById('nameInput').addEventListener('keydown',     e => { if (e.key === 'Enter') submitLobby(); });
 document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitLobby(); });
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'logout' }));
+});

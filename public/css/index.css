@@ -131,6 +131,7 @@ body::before {
 }
 .lobby-input:focus { border-color: var(--gold); }
 .lobby-input::placeholder { color: #333; font-size: 12px; letter-spacing: 1px; }
+#passwordInput { margin-bottom: 4px; }
 
 .lobby-error {
   font-size: 11px; color: var(--red);
@@ -235,6 +236,25 @@ body::before {
 .hub-tokens-value.bump { animation: bump 0.3s ease; }
 @keyframes bump {
   50% { transform: scale(1.15); color: var(--green); }
+}
+
+.hub-logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255,45,85,0.25);
+  color: #444;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.hub-logout-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
 }
 
 .game-select-label {

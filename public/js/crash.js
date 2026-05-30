@@ -28,7 +28,7 @@ ws.addEventListener('message', (e) => {
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
+    document.getElementById('gameUI').classList.remove('hidden');
     resizeCanvas();
     updateTokenDisplay();
     renderIdle();
@@ -223,8 +223,8 @@ function renderIdle() {
 
   const bar      = document.getElementById('actionBar');
   const noTokens = document.getElementById('noTokensMsg');
-  if (tokens <= 0) { bar.innerHTML = ''; noTokens.style.display = 'block'; return; }
-  noTokens.style.display = 'none';
+  if (tokens <= 0) { bar.innerHTML = ''; noTokens.classList.remove('hidden'); return; }
+  noTokens.classList.add('hidden');
   bar.innerHTML = '';
   const canAfford = tokens >= bet;
   const btn = document.createElement('button');

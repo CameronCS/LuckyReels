@@ -36,7 +36,7 @@ ws.addEventListener('message', (e) => {
     tokens = msg.tokens;
     document.getElementById('playerNameDisplay').textContent = msg.name;
     document.getElementById('loadingScreen').classList.add('hidden');
-    document.getElementById('gameUI').style.display = '';
+    document.getElementById('gameUI').classList.remove('hidden');
     if (machines.length === 0) addMachine();
     updateDisplay();
     return;
@@ -81,9 +81,9 @@ function updateDisplay() {
   const noTokens = document.getElementById('noTokens');
   const cost = bet * machines.length;
   spinBtn.textContent = machines.length > 1 ? `SPIN ALL · ${cost}` : 'SPIN';
-  if (tokens <= 0) { spinBtn.style.display = 'none'; noTokens.style.display = 'block'; }
-  else if (tokens < cost) { spinBtn.disabled = true; spinBtn.style.display = 'block'; noTokens.style.display = 'none'; }
-  else { spinBtn.disabled = false; spinBtn.style.display = 'block'; noTokens.style.display = 'none'; }
+  if (tokens <= 0) { spinBtn.classList.add('hidden'); noTokens.classList.remove('hidden'); }
+  else if (tokens < cost) { spinBtn.disabled = true; spinBtn.classList.remove('hidden'); noTokens.classList.add('hidden'); }
+  else { spinBtn.disabled = false; spinBtn.classList.remove('hidden'); noTokens.classList.add('hidden'); }
   machines.forEach(m => {
     const btn = document.getElementById(`slot-${m.id}-spinbtn`);
     if (btn) btn.disabled = spinning || m.spinning || tokens < bet;

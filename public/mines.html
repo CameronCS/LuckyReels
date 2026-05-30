@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💣 Mines</title>
+<link rel="stylesheet" href="/css/shared.css">
 <link rel="stylesheet" href="/css/mines.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +12,7 @@
 
 <div class="loading-screen" id="loadingScreen">Connecting...</div>
 
-<div class="app-wrapper" id="gameUI" style="display:none">
+<div class="app-wrapper hidden" id="gameUI">
 
   <!-- Header -->
   <div class="game-header">
@@ -84,14 +85,14 @@
 
   <!-- Action -->
   <div class="action-bar" id="actionBar"></div>
-  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+  <div class="no-tokens-msg hidden" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
 
   <!-- Rules -->
   <div class="rules-strip">
-    <div class="rule"><span style="color:var(--gem-col)">Safe cell</span>Increases multiplier</div>
-    <div class="rule"><span style="color:var(--mine-col)">Mine</span>Lose your bet</div>
-    <div class="rule"><span style="color:var(--gold)">Cash out</span>Collect anytime</div>
-    <div class="rule"><span style="color:#888">House edge</span>3% on all payouts</div>
+    <div class="rule"><span class="c-blue">Safe cell</span>Increases multiplier</div>
+    <div class="rule"><span class="c-mine">Mine</span>Lose your bet</div>
+    <div class="rule"><span class="c-gold">Cash out</span>Collect anytime</div>
+    <div class="rule"><span class="c-dim">House edge</span>3% on all payouts</div>
   </div>
 
 </div>
