@@ -134,6 +134,21 @@ async function main() {
   `);
 
   await con.query(`
+    CREATE TABLE IF NOT EXISTS crash_logs (
+      id            BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      player_id     CHAR(36)      NOT NULL,
+      bet           INT           NOT NULL,
+      crash_point   DECIMAL(10,2) NOT NULL,
+      cashout_mult  DECIMAL(10,2) NULL,
+      net           INT           NOT NULL,
+      outcome       VARCHAR(12)   NOT NULL,
+      created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_cr_player_time (player_id, created_at),
+      CONSTRAINT fk_cr_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
+  `);
+
+  await con.query(`
     CREATE TABLE IF NOT EXISTS mines_logs (
       id             BIGINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
       player_id      CHAR(36)    NOT NULL,
