@@ -134,6 +134,21 @@ async function main() {
   `);
 
   await con.query(`
+    CREATE TABLE IF NOT EXISTS mines_logs (
+      id             BIGINT      NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      player_id      CHAR(36)    NOT NULL,
+      bet            INT         NOT NULL,
+      mine_count     INT         NOT NULL,
+      cells_revealed INT         NOT NULL,
+      net            INT         NOT NULL,
+      outcome        VARCHAR(12) NOT NULL,
+      created_at     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_mn_player_time (player_id, created_at),
+      CONSTRAINT fk_mn_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
+  `);
+
+  await con.query(`
     CREATE TABLE IF NOT EXISTS admins (
       id            INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
       username      VARCHAR(40)  NOT NULL,

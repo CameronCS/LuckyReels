@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💣 Mines</title>
+<link rel="stylesheet" href="/css/mines.css">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">Connecting...</div>
+
+<div class="app-wrapper" id="gameUI" style="display:none">
+
+  <!-- Header -->
+  <div class="game-header">
+    <a class="back-btn" href="/">← Hub</a>
+    <div class="header-center">
+      <h1>Mines</h1>
+      <p class="tagline">5×5 Grid · Avoid the Bombs</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill" id="playerPill">💣 <span id="playerNameDisplay"></span></div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" id="tokenCount">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mines panel -->
+  <div class="mines-panel">
+
+    <!-- Mine count selector (idle only) -->
+    <div class="mines-count-bar" id="minesCountBar">
+      <span class="mc-label">MINES</span>
+      <button class="mc-btn" data-val="1">1</button>
+      <button class="mc-btn active" data-val="3">3</button>
+      <button class="mc-btn" data-val="5">5</button>
+      <button class="mc-btn" data-val="10">10</button>
+      <button class="mc-btn" data-val="15">15</button>
+      <button class="mc-btn" data-val="20">20</button>
+    </div>
+
+    <!-- Result banner -->
+    <div class="result-banner" id="resultBanner"></div>
+
+    <!-- 5×5 grid -->
+    <div class="mines-grid" id="minesGrid"></div>
+
+    <!-- Status bar (playing only) -->
+    <div class="game-status hidden" id="gameStatus">
+      <div class="status-col">
+        <div class="status-label">MULTIPLIER</div>
+        <div class="status-val gold" id="multiplierDisplay">1.00×</div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-col">
+        <div class="status-label">CASHOUT</div>
+        <div class="status-val green" id="cashoutDisplay">—</div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-col">
+        <div class="status-label">MINES</div>
+        <div class="status-val red" id="minesCountDisplay">—</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bet amount -->
+  <div class="controls-bar" id="controlsBar">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn active" data-val="1">1</button>
+    <button class="bet-btn" data-val="5">5</button>
+    <button class="bet-btn" data-val="10">10</button>
+    <button class="bet-btn" data-val="25">25</button>
+    <button class="bet-btn" data-val="50">50</button>
+    <button class="bet-btn" data-val="100">100</button>
+    <input class="bet-custom" type="number" id="betCustom" placeholder="custom" min="1">
+    <div class="current-bet-display">BET <span id="betDisplay">1</span></div>
+  </div>
+
+  <!-- Action -->
+  <div class="action-bar" id="actionBar"></div>
+  <div class="no-tokens-msg" id="noTokensMsg">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <!-- Rules -->
+  <div class="rules-strip">
+    <div class="rule"><span style="color:var(--gem-col)">Safe cell</span>Increases multiplier</div>
+    <div class="rule"><span style="color:var(--mine-col)">Mine</span>Lose your bet</div>
+    <div class="rule"><span style="color:var(--gold)">Cash out</span>Collect anytime</div>
+    <div class="rule"><span style="color:#888">House edge</span>3% on all payouts</div>
+  </div>
+
+</div>
+
+<script src="/js/mines.js" defer></script>
+</body>
+</html>
