@@ -134,6 +134,21 @@ async function main() {
   `);
 
   await con.query(`
+    CREATE TABLE IF NOT EXISTS plinko_logs (
+      id          BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      player_id   CHAR(36)      NOT NULL,
+      bet         INT           NOT NULL,
+      risk        VARCHAR(8)    NOT NULL,
+      slot        INT           NOT NULL,
+      multiplier  DECIMAL(8,2)  NOT NULL,
+      net         INT           NOT NULL,
+      created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      KEY idx_pl_player_time (player_id, created_at),
+      CONSTRAINT fk_pl_player FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB;
+  `);
+
+  await con.query(`
     CREATE TABLE IF NOT EXISTS crash_logs (
       id            BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
       player_id     CHAR(36)      NOT NULL,
