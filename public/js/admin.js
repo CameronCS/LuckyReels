@@ -57,6 +57,16 @@ ws.addEventListener('message', (e) => {
     pushGameEvent(playerId, { game: 'baccarat', betType, outcome, playerCards, bankerCards, bet, net, time: new Date().toLocaleTimeString() });
     return;
   }
+  if (msg.type === 'minesEvent') {
+    const { playerId, bet, mineCount, cellsRevealed, net, outcome } = msg;
+    pushGameEvent(playerId, { game: 'mines', bet, mineCount, cellsRevealed, net, outcome, time: new Date().toLocaleTimeString() });
+    return;
+  }
+  if (msg.type === 'crashEvent') {
+    const { playerId, bet, crashPoint, cashoutMult, net, outcome } = msg;
+    pushGameEvent(playerId, { game: 'crash', bet, crashPoint, cashoutMult, net, outcome, time: new Date().toLocaleTimeString() });
+    return;
+  }
 
   if (msg.type === 'createAdmin:ok') {
     document.getElementById('newAdminUsername').value = '';
@@ -368,6 +378,12 @@ function buildFilterPills(playerId) {
   const hasBaccarat = logs.some(l => l.game === 'baccarat');
   if (hasBaccarat)
     pills.push(`<button class="filter-pill ${active === 'baccarat' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="baccarat">🎴 Baccarat</button>`);
+  const hasMines = logs.some(l => l.game === 'mines');
+  if (hasMines)
+    pills.push(`<button class="filter-pill ${active === 'mines' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="mines">💣 Mines</button>`);
+  const hasCrash = logs.some(l => l.game === 'crash');
+  if (hasCrash)
+    pills.push(`<button class="filter-pill ${active === 'crash' ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="crash">🚀 Crash</button>`);
   machines.forEach(n =>
     pills.push(`<button class="filter-pill ${active === n ? 'active' : ''}" data-action="filter" data-player="${playerId}" data-filter="${n}">M${n}</button>`)
   );
@@ -391,6 +407,8 @@ function buildLogEntries(playerId) {
   else if (filter === 'roulette')  entries = all.filter(e => e.game === 'roulette');
   else if (filter === 'horse')     entries = all.filter(e => e.game === 'horse');
   else if (filter === 'baccarat')  entries = all.filter(e => e.game === 'baccarat');
+  else if (filter === 'mines')     entries = all.filter(e => e.game === 'mines');
+  else if (filter === 'crash')     entries = all.filter(e => e.game === 'crash');
   else                             entries = all.filter(e => e.game === 'slots' && e.machineNum === filter);
 
   if (entries.length === 0) {
@@ -439,6 +457,31 @@ function buildLogEntries(playerId) {
         <span class="spin-icon">${icon}</span>
         <span class="spin-machine" style="color:#c688ff;font-size:8px">BAC</span>
         <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${escHtml(e.betType)} · ${escHtml(e.outcome)}</span>
+        <span class="spin-amount ${amtClass}">${amtText}</span>
+        <span class="spin-time">${e.time}</span></div>`;
+    }
+    if (e.game === 'mines') {
+      const amtClass = e.net > 0 ? 'pos' : e.net < 0 ? 'neg' : '';
+      const amtText  = e.net > 0 ? `+${e.net}` : `−${Math.abs(e.net)}`;
+      const icon     = e.outcome === 'cashed_out' ? '💎' : '💣';
+      return `<div class="spin-entry">
+        <span class="spin-icon">${icon}</span>
+        <span class="spin-machine" style="color:#FF9500;font-size:8px">MN</span>
+        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${e.mineCount} mines · ${e.cellsRevealed} safe</span>
+        <span class="spin-amount ${amtClass}">${amtText}</span>
+        <span class="spin-time">${e.time}</span></div>`;
+    }
+    if (e.game === 'crash') {
+      const amtClass = e.net > 0 ? 'pos' : e.net < 0 ? 'neg' : '';
+      const amtText  = e.net > 0 ? `+${e.net}` : `−${Math.abs(e.net)}`;
+      const icon     = e.outcome === 'cashed_out' ? '🚀' : '💥';
+      const detail   = e.outcome === 'cashed_out'
+        ? `cashed ${e.cashoutMult}× · crashed ${e.crashPoint}×`
+        : `crashed ${e.crashPoint}×`;
+      return `<div class="spin-entry">
+        <span class="spin-icon">${icon}</span>
+        <span class="spin-machine" style="color:#FF4500;font-size:8px">CR</span>
+        <span class="spin-symbols" style="font-size:10px;letter-spacing:1px">${detail}</span>
         <span class="spin-amount ${amtClass}">${amtText}</span>
         <span class="spin-time">${e.time}</span></div>`;
     }
