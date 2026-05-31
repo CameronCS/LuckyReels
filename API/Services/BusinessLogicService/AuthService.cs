@@ -64,7 +64,7 @@ public class AuthService(
             Name = request.Name,
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Tokens = 0,
+            Tokens = 10_000,
             CreatedAt = DateTime.UtcNow
         };
 
