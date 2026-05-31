@@ -1,0 +1,32 @@
+<div class="stars" #starsEl></div>
+
+<div class="hub">
+  <div class="hub-header">
+    <div>
+      <div class="hub-title">Lucky Reels Casino</div>
+      <div class="hub-sub">Choose your game</div>
+    </div>
+    <div class="hub-player">
+      <div class="hub-name-pill">
+        <div class="hub-online-dot"></div>
+        <span>{{ userName }}</span>
+      </div>
+      <div class="hub-tokens">
+        <div class="hub-tokens-label">🪙 Tokens</div>
+        <div class="hub-tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+      <button class="hub-logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="game-select-label">Select a game</div>
+
+  <div class="game-cards">
+    <a class="game-card" [ngClass]="game.cls" *ngFor="let game of games" (click)="navigate(game.route)" style="cursor:pointer">
+      <div class="game-icon">{{ game.emoji }}</div>
+      <div class="game-name">{{ game.name }}</div>
+      <div class="game-desc">{{ game.desc }}</div>
+      <button class="game-play-btn">PLAY</button>
+    </a>
+  </div>
+</div>

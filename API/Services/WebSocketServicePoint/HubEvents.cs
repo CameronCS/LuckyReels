@@ -22,5 +22,7 @@ public static class HubEvents
 
     public const string PlinkoResult     = "PlinkoResult";
 
+    public const string TokensUpdated    = "TokensUpdated";
+
     public const string Error            = "Error";
 }

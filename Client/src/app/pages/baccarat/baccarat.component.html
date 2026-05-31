@@ -1,0 +1,101 @@
+<div class="stars" #starsEl></div>
+
+<div class="app-wrapper">
+
+  <div class="game-header">
+    <button class="back-btn" (click)="goBack()">← Hub</button>
+    <div class="header-center">
+      <h1>Baccarat</h1>
+      <p class="tagline">Punto Banco · 8 Decks</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">🎴 {{ userName }}</div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bac-table">
+
+    <div class="bac-side banker-side">
+      <div class="side-label banker">
+        BANKER
+        <span [ngClass]="bankerScoreCls">{{ bankerScore > 0 ? bankerScore : '' }}</span>
+      </div>
+      <div class="cards-row">
+        <div class="card" [class.red]="isRed(card)" [class.black]="!isRed(card)"
+             *ngFor="let card of bankerCards">
+          <div class="card-rank-top">{{ card.rank }}</div>
+          <div class="card-suit-top">{{ card.suit }}</div>
+          <div class="card-suit-center">{{ card.suit }}</div>
+          <div class="card-suit-bot">{{ card.suit }}</div>
+          <div class="card-rank-bot">{{ card.rank }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div [ngClass]="resultCls">{{ resultText }}</div>
+
+    <div class="bac-side player-side">
+      <div class="side-label player">
+        PLAYER
+        <span [ngClass]="scoreCls">{{ playerScore > 0 ? playerScore : '' }}</span>
+      </div>
+      <div class="cards-row">
+        <div class="card" [class.red]="isRed(card)" [class.black]="!isRed(card)"
+             *ngFor="let card of playerCards">
+          <div class="card-rank-top">{{ card.rank }}</div>
+          <div class="card-suit-top">{{ card.suit }}</div>
+          <div class="card-suit-center">{{ card.suit }}</div>
+          <div class="card-suit-bot">{{ card.suit }}</div>
+          <div class="card-rank-bot">{{ card.rank }}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bet-type-row">
+    <div class="bet-type-btn player-btn" [class.selected]="betType === 'player'" (click)="setBetType('player')">
+      <span class="bet-type-label">Player</span>
+      <span class="bet-type-odds">Pays 1:1 · Push on Tie</span>
+    </div>
+    <div class="bet-type-btn tie-btn" [class.selected]="betType === 'tie'" (click)="setBetType('tie')">
+      <span class="bet-type-label">Tie</span>
+      <span class="bet-type-odds">Pays 8:1</span>
+    </div>
+    <div class="bet-type-btn banker-btn" [class.selected]="betType === 'banker'" (click)="setBetType('banker')">
+      <span class="bet-type-label">Banker</span>
+      <span class="bet-type-odds">Pays 0.95:1 · Push on Tie</span>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn" *ngFor="let b of presetBets"
+            [class.active]="activeBet === b"
+            (click)="setBet(b)">{{ b }}</button>
+    <input class="bet-custom" type="number" [(ngModel)]="customBet"
+           (input)="onCustomBet()" placeholder="custom" min="1">
+    <div class="current-bet-display">BET <span>{{ bet }}</span></div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn-deal" (click)="deal()"
+            [disabled]="dealing || tokens < bet"
+            [textContent]="tokens >= bet ? 'DEAL · ' + bet : 'Need ' + bet + ' tokens'"></button>
+  </div>
+
+  <div class="no-tokens-msg" *ngIf="tokens <= 0">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <div class="rules-strip">
+    <div class="rule"><span class="player">Player</span>pays 1:1</div>
+    <div class="rule"><span class="banker">Banker</span>pays 0.95:1</div>
+    <div class="rule"><span class="tie">Tie</span>pays 8:1</div>
+    <div class="rule"><span class="c-dim">Push</span>Tie returns P/B bets</div>
+    <div class="rule"><span class="c-dim">Natural</span>8 or 9 on initial deal</div>
+  </div>
+
+</div>

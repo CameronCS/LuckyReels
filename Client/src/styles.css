@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap');
+
+/* ── Global CSS variables ─────────────────────────── */
+:root {
+  --gold:       #FFD700;
+  --gold2:      #FFA500;
+  --red:        #FF2D55;
+  --dark:       #0a0a0f;
+  --panel:      #12121a;
+  --deep:       #080810;
+  --border:     #2a2a3a;
+  --green:      #00FF87;
+  --purple:     #c688ff;
+  --blue:       #0AF5F5;
+  --text:       #e8e8f0;
+  --felt:       #0d1f12;
+  /* game-specific */
+  --crash-lo:   #00D4FF;
+  --crash-mid:  #FF9500;
+  --crash-hi:   #FF4500;
+  --mine-col:   #FF3B3B;
+  --gem-col:    #00D4FF;
+  --accent:     #FF9500;
+  --plinko:     #FF2D8B;
+  --player-col: #FF2D55;
+  --banker-col: #0AF5F5;
+  --tie-col:    #00FF87;
+  --rr:         #8b1515;
+  --rg:         #1a5c1a;
+  --turf:       #071408;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  overflow-x: hidden;
+}
+
+/* Shared utility classes */
+.hidden { display: none !important; }
+.c-dim    { color: #888888; }
+.c-dark   { color: #2a2a3a; }
+.c-gold   { color: var(--gold); }
+.c-green  { color: var(--green); }
+.c-blue   { color: var(--blue); }
+.c-mine   { color: var(--mine-col); }
+.c-orange { color: var(--crash-hi); }
+.c-amber  { color: var(--accent); }
+.c-pink   { color: var(--plinko); }

@@ -1,0 +1,69 @@
+<div class="stars" #starsEl></div>
+
+<div class="app-wrapper">
+
+  <div class="game-header">
+    <button class="back-btn" (click)="goBack()">← Hub</button>
+    <div class="header-center">
+      <h1>Lucky Reels</h1>
+      <p class="tagline">Spin to Win · Pull the Handle</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">👤 {{ userName }}</div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="bet-section">
+      <span class="bet-label">Bet</span>
+      <button class="bet-btn" *ngFor="let b of presetBets"
+              [class.active]="activeBet === b"
+              (click)="setBet(b)">{{ b }}</button>
+      <input class="bet-custom" type="number" [(ngModel)]="customBet"
+             (input)="onCustomBet()" placeholder="custom" min="1">
+    </div>
+    <div class="controls-divider"></div>
+    <div class="machine-section">
+      <span class="machine-count-label">{{ machines.length === 1 ? '1 MACHINE' : machines.length + ' MACHINES' }}</span>
+      <button class="add-machine-btn" (click)="addMachine()" [disabled]="machines.length >= 6">+ ADD</button>
+    </div>
+  </div>
+
+  <div class="machines-grid" [ngClass]="colsClass" id="machinesGrid">
+    <div class="slot-card" *ngFor="let m of machines" [class.shake]="m.shake">
+      <div class="slot-header">
+        <span class="slot-title">Machine {{ m.num }}</span>
+        <button class="remove-slot-btn" [class.hidden]="machines.length <= 1" (click)="removeMachine(m.id)">×</button>
+      </div>
+      <div class="slot-reels">
+        <div class="slot-symbol" *ngFor="let sym of m.symbols; let i = index"
+             [class.winner]="m.winnerMask[i]">{{ sym }}</div>
+      </div>
+      <div class="slot-msg" [ngClass]="m.msgClass">{{ m.msg }}</div>
+      <button class="slot-spin-btn" (click)="spinOne(m)"
+              [disabled]="spinning || m.spinning || tokens < bet">SPIN</button>
+    </div>
+  </div>
+
+  <div class="game-footer">
+    <div class="message-bar neutral" [ngClass]="messageBarClass">{{ messageBar }}</div>
+    <div class="no-tokens" *ngIf="showNoTokens">⛔ Out of tokens — ask the admin to top you up.</div>
+    <button class="spin-btn" (click)="spinAll()" [disabled]="!canSpin()">{{ spinBtnText }}</button>
+    <button class="paytable-toggle-btn" (click)="togglePaytable()">Paytable {{ paytableOpen ? '▴' : '▾' }}</button>
+    <div class="paytable-content" [class.open]="paytableOpen">
+      <div class="paytable-grid">
+        <div class="pay-row"><div class="pay-symbols">💎💎💎</div><div class="pay-amount">×50</div></div>
+        <div class="pay-row"><div class="pay-symbols">7️⃣7️⃣7️⃣</div><div class="pay-amount">×20</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍀🍀🍀</div><div class="pay-amount">×15</div></div>
+        <div class="pay-row"><div class="pay-symbols">⭐⭐⭐</div><div class="pay-amount">×10</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍒🍒🍒</div><div class="pay-amount">×5</div></div>
+        <div class="pay-row"><div class="pay-symbols">🍋🍋🍋</div><div class="pay-amount">×3</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>

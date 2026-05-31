@@ -22,6 +22,8 @@ public class GameHub(IServiceProvider services) : Hub
     public override async Task OnConnectedAsync()
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, "Online");
+        int tokens = await Game<IAuthService>().GetTokensAsync(PlayerId);
+        await Clients.Caller.SendAsync(HubEvents.TokensUpdated, tokens);
         await base.OnConnectedAsync();
     }
 
@@ -31,6 +33,11 @@ public class GameHub(IServiceProvider services) : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Crash");
         await base.OnDisconnectedAsync(exception);
     }
+
+    // ── Balance ──────────────────────────────────────────────────────────────
+
+    public async Task<int> GetTokens()
+        => await Game<IAuthService>().GetTokensAsync(PlayerId);
 
     // ── Slots ─────────────────────────────────────────────────────────────────
 

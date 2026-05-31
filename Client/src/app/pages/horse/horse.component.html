@@ -1,0 +1,77 @@
+<div class="stars" #starsEl></div>
+
+<div class="app-wrapper">
+
+  <div class="game-header">
+    <button class="back-btn" (click)="goBack()">← Hub</button>
+    <div class="header-center">
+      <h1>Horse Racing</h1>
+      <p class="tagline">6 Horses · Pick One · Winner Pays 4×</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">🏇 {{ userName }}</div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div [ngClass]="statusCls">{{ statusText }}</div>
+
+  <div class="track-section">
+    <div class="lane" *ngFor="let horse of horses; let i = index"
+         [class.winner-lane]="horse.isWinnerLane">
+      <div class="lane-label">
+        <span class="lane-num" [style.color]="horse.color">{{ i + 1 }}</span>
+        <span class="lane-name" [class.selected-horse]="isSelectedHorse(i)">{{ horse.name }}</span>
+      </div>
+      <div class="track-strip">
+        <div class="horse-runner" [style.left]="horse.pos + '%'">🏇</div>
+      </div>
+      <div [ngClass]="horse.finishClass">{{ horse.finishOrdinal }}</div>
+    </div>
+  </div>
+
+  <div class="betting-section">
+    <div class="horse-cards">
+      <div class="horse-card" *ngFor="let horse of horses; let i = index"
+           [class.selected]="isSelectedHorse(i)"
+           [style.border-color]="isSelectedHorse(i) ? horse.color : ''"
+           [style.box-shadow]="isSelectedHorse(i) ? '0 0 12px ' + horse.color + '33' : ''"
+           (click)="selectHorse(i)">
+        <div class="horse-badge" [style.background]="horse.color">{{ i + 1 }}</div>
+        <div class="horse-card-info">
+          <div class="horse-card-name">{{ horse.name }}</div>
+          <div class="horse-card-payout">Pays 4×</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bet-controls">
+      <div class="chip-row">
+        <span class="ctrl-label">CHIP</span>
+        <button class="chip" *ngFor="let c of chipBtns"
+                [class.active]="selectedChip === c && !customChipVisible"
+                (click)="setChip(c)">{{ c }}</button>
+        <button class="chip chip-custom" [class.active]="customChipVisible" (click)="showCustomChip()">CUSTOM</button>
+        <input type="number" class="custom-chip-input" *ngIf="customChipVisible"
+               [(ngModel)]="customChipValue" (input)="applyCustomChip()" min="1" placeholder="amount">
+      </div>
+      <div class="action-row">
+        <div class="bet-display">BET <span>{{ bet }}</span></div>
+        <button class="btn-race" (click)="startRace()" [disabled]="racing">RACE</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="no-tokens-msg" *ngIf="tokens <= 0">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <div class="rules-strip">
+    <div class="rule"><span>Pick One Horse</span>winner pays 4×</div>
+    <div class="rule"><span>6 Horses</span>equal chance to win</div>
+    <div class="rule"><span>Close Race</span>90% of the time</div>
+    <div class="rule"><span>Blowout</span>some serious losers — 10%</div>
+  </div>
+
+</div>

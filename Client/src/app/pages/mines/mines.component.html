@@ -1,0 +1,90 @@
+<div class="stars" #starsEl></div>
+
+<div class="app-wrapper">
+
+  <div class="game-header">
+    <button class="back-btn" (click)="goBack()">← Hub</button>
+    <div class="header-center">
+      <h1>Mines</h1>
+      <p class="tagline">5×5 Grid · Avoid the Bombs</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">💣 {{ userName }}</div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mines-panel">
+
+    <div class="mines-count-bar" *ngIf="isIdle">
+      <span class="mc-label">MINES</span>
+      <button class="mc-btn" *ngFor="let n of minePresets"
+              [class.active]="mineCount === n"
+              (click)="setMineCount(n)">{{ n }}</button>
+    </div>
+
+    <div [ngClass]="bannerCls">{{ bannerText }}</div>
+
+    <div class="mines-grid" [class.playing]="isPlaying">
+      <div *ngFor="let cell of cells; let i = index"
+           [ngClass]="getCellCls(cell)"
+           (click)="clickCell(i)">{{ getCellEmoji(cell) }}</div>
+    </div>
+
+    <div class="game-status" *ngIf="isPlaying">
+      <div class="status-col">
+        <div class="status-label">MULTIPLIER</div>
+        <div class="status-val gold">{{ multiplier }}×</div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-col">
+        <div class="status-label">CASHOUT</div>
+        <div class="status-val green">{{ cashoutValue }}</div>
+      </div>
+      <div class="status-divider"></div>
+      <div class="status-col">
+        <div class="status-label">MINES</div>
+        <div class="status-val red">{{ minesCountDisplay }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="controls-bar" *ngIf="isIdle">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn" *ngFor="let b of presetBets"
+            [class.active]="activeBet === b"
+            (click)="setBet(b)">{{ b }}</button>
+    <input class="bet-custom" type="number" [(ngModel)]="customBet"
+           (input)="onCustomBet()" placeholder="custom" min="10">
+    <div class="current-bet-display">BET <span>{{ bet }}</span></div>
+  </div>
+
+  <div class="action-bar">
+    <ng-container *ngIf="isIdle">
+      <button class="btn-start" (click)="startGame()"
+              [disabled]="tokens < bet"
+              [textContent]="tokens >= bet ? 'START GAME · ' + bet : 'Need ' + bet + ' tokens'"></button>
+    </ng-container>
+    <ng-container *ngIf="isPlaying">
+      <button class="btn-cashout" (click)="cashout()"
+              [disabled]="revealedCount === 0">{{ cashoutBtnText }}</button>
+    </ng-container>
+    <ng-container *ngIf="isEnded">
+      <button class="btn-start" (click)="playAgain()">PLAY AGAIN</button>
+    </ng-container>
+  </div>
+
+  <div class="no-tokens-msg" *ngIf="tokens <= 0">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <div class="rules-strip">
+    <div class="rule"><span class="c-blue">Safe cell</span>Increases multiplier</div>
+    <div class="rule"><span class="c-mine">Mine</span>Lose your bet</div>
+    <div class="rule"><span class="c-gold">Cash out</span>Collect anytime</div>
+    <div class="rule"><span class="c-dim">House edge</span>3% on all payouts</div>
+  </div>
+
+</div>

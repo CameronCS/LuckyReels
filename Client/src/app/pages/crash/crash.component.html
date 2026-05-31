@@ -1,0 +1,71 @@
+<div class="stars" #starsEl></div>
+
+<div class="app-wrapper">
+
+  <div class="game-header">
+    <button class="back-btn" (click)="goBack()">← Hub</button>
+    <div class="header-center">
+      <h1>Crash</h1>
+      <p class="tagline">Cash Out Before It Crashes</p>
+    </div>
+    <div class="header-right">
+      <div class="player-pill">🚀 {{ userName }}</div>
+      <div class="tokens-box">
+        <div class="tokens-box-label">🪙 Tokens</div>
+        <div class="tokens-value" [class.bump]="tokensBump">{{ tokens }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="crash-display">
+    <canvas #crashCanvas></canvas>
+    <div class="mult-overlay">
+      <div [ngClass]="multCls">{{ multText }}</div>
+      <div class="mult-sub">{{ multSub }}</div>
+    </div>
+    <div [ngClass]="resultCls" *ngIf="resultText">{{ resultText }}</div>
+  </div>
+
+  <div class="controls-bar" *ngIf="isIdle">
+    <span class="bet-label">Bet</span>
+    <button class="bet-btn" *ngFor="let b of presetBets"
+            [class.active]="activeBet === b"
+            (click)="setBet(b)">{{ b }}</button>
+    <input class="bet-custom" type="number" [(ngModel)]="customBet"
+           (input)="onCustomBet()" placeholder="custom" min="10">
+    <div class="current-bet-display">BET <span>{{ bet }}</span></div>
+  </div>
+
+  <div class="auto-cashout-bar" *ngIf="isIdle">
+    <span class="ac-label">AUTO CASH OUT AT</span>
+    <input class="ac-input" type="number" [(ngModel)]="autoCashoutValue" placeholder="off" min="1.01" step="0.01">
+    <span class="ac-suffix">×</span>
+  </div>
+
+  <div class="action-bar">
+    <ng-container *ngIf="isIdle">
+      <button class="btn-launch" (click)="launch()"
+              [disabled]="!canLaunch"
+              [textContent]="canLaunch ? 'BET & LAUNCH · ' + bet : 'Need ' + bet + ' tokens'"></button>
+    </ng-container>
+    <ng-container *ngIf="isWaiting">
+      <button class="btn-launch" disabled>WAITING FOR ROUND...</button>
+    </ng-container>
+    <ng-container *ngIf="isPlaying">
+      <button class="btn-cashout" (click)="cashout()">{{ cashoutBtnText }}</button>
+    </ng-container>
+    <ng-container *ngIf="isEnded">
+      <button class="btn-launch" (click)="playAgain()">PLAY AGAIN</button>
+    </ng-container>
+  </div>
+
+  <div class="no-tokens-msg" *ngIf="tokens <= 0">⛔ Out of tokens — ask the admin to top you up.</div>
+
+  <div class="rules-strip">
+    <div class="rule"><span class="c-blue">Bet & Launch</span>Multiplier climbs from 1×</div>
+    <div class="rule"><span class="c-green">Cash Out</span>Collect bet × multiplier</div>
+    <div class="rule"><span class="c-orange">Crash</span>Lose your entire bet</div>
+    <div class="rule"><span class="c-dim">House edge</span>~1% · Crash at any time</div>
+  </div>
+
+</div>

@@ -52,6 +52,12 @@ public class AuthService(
         };
     }
 
+    public async Task<int> GetTokensAsync(Guid playerId, CancellationToken ct = default)
+    {
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        return player?.Tokens ?? 0;
+    }
+
     public async Task<AuthenticationResponse> RegisterPlayerAsync(RegisterRequest request, CancellationToken ct = default)
     {
         UsrPlayer existing = await _dataLayerService.GetPlayerByNameAsync(request.Name, ct);
