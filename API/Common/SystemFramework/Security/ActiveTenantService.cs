@@ -26,14 +26,14 @@ public class ActiveTenantService(IHttpContextAccessor httpContext) {
         }
     }
 
-    public int UserId {
+    public string UserId {
         get {
             if (!IsAuthenticated) {
                 throw new UnauthorizedAccessException("User is not authenticated.");
             }
             Claim userIdClaim = _httpContext.HttpContext.User.FindFirst(ClaimTypes.Sid);
             if (userIdClaim is not null) {
-                return int.Parse(userIdClaim.Value);
+                return userIdClaim.Value;
             }
             throw new UnauthorizedAccessException("User Id claim not found.");
         }

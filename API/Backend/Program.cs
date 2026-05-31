@@ -33,6 +33,9 @@ public class Program {
         builder.Services.AddTransient<BusinessLogicServiceInterface.IErrorService, BusinessLogicService.ErrorService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IErrorService, DataAccessService.ErrorService>();
 
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IAuthService, BusinessLogicService.AuthService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IAuthService, DataAccessService.AuthService>();
+
         builder.Services.AddSingleton(sp => {
             ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             MapperConfiguration mapperConfiguration = new(cfg => {

@@ -1,0 +1,10 @@
+using DatabaseEntities;
+
+namespace DataAccessServiceInterface;
+
+public interface IAuthService : IBaseDataLayerService
+{
+    Task<UsrPlayer> GetPlayerByNameAsync(string name, CancellationToken ct = default);
+    Task<UsrAdmin> GetAdminByUsernameAsync(string username, CancellationToken ct = default);
+    Task AddPlayerAsync(UsrPlayer player, CancellationToken ct = default);
+}

@@ -165,9 +165,9 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_LOG_Admin_Time' AND o
     CREATE INDEX idx_LOG_Admin_Time ON LOG_Admin (AdminID, CreatedAt);
 GO
 
--- ── LOG_Error ─────────────────────────────────────────────────────────────────
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'LOG_Error')
-CREATE TABLE LOG_Error (
+-- ── ERR_Error ─────────────────────────────────────────────────────────────────
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ERR_Error')
+CREATE TABLE ERR_Error (
     ID          INT             NOT NULL IDENTITY(1,1),
     Date        DATETIME2       NOT NULL DEFAULT SYSDATETIME(),
     Exception   NVARCHAR(MAX)   NOT NULL,
@@ -175,6 +175,6 @@ CREATE TABLE LOG_Error (
     Uri         NVARCHAR(500)   NOT NULL,
     Username    NVARCHAR(40)    NOT NULL,
     Host        NVARCHAR(255)   NOT NULL,
-    CONSTRAINT pk_LOG_Error PRIMARY KEY (ID)
+    CONSTRAINT pk_ERR_Error PRIMARY KEY (ID)
 );
 GO
