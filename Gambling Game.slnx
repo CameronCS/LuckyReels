@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/Backend/">
+    <Project Path="API/Backend/Backend.csproj" />
+  </Folder>
+  <Folder Name="/Backend/Common/">
+    <Project Path="API/Common/Models/Models.csproj" />
+    <Project Path="API/Common/SystemFramework/SystemFramework.csproj" />
+  </Folder>
+  <Folder Name="/Backend/Database/">
+    <Project Path="API/Database/DatabaseEntities/DatabaseEntities.csproj" />
+    <Project Path="API/Database/MigrationHandler/MigrationHandler.csproj" />
+  </Folder>
+  <Folder Name="/Backend/ServiceInterfaces/">
+    <Project Path="API/ServiceInterfaces/BusinessLogicServiceInterface/BusinessLogicServiceInterface.csproj" />
+    <Project Path="API/ServiceInterfaces/DataAccessServiceInterface/DataAccessServiceInterface.csproj" />
+  </Folder>
+  <Folder Name="/Backend/Services/">
+    <Project Path="API/Services/APIGateWay/APIGateWay.csproj" />
+    <Project Path="API/Services/BusinessLogicService/BusinessLogicService.csproj" />
+    <Project Path="API/Services/DataAccessService/DataAccessService.csproj" />
+    <Project Path="API/Services/WebSocketServicePoint/WebSocketServicePoint.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/">
+    <Project Path="Client/Client.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+</Solution>

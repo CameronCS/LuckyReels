@@ -13,7 +13,11 @@
       "Bash(Get-ChildItem -Recurse -Force)",
       "Bash(Select-Object FullName, PSIsContainer)",
       "Bash(Sort-Object FullName)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(ng version *)",
+      "PowerShell(npm *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)"
     ]
   }
 }
