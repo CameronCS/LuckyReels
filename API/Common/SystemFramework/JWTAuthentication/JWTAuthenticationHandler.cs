@@ -25,11 +25,11 @@ public class JWTAuthenticationHandler(IOptionsMonitor<JWTAuthenticationOptions> 
 
         string headerValue = Request.Headers[headerName].FirstOrDefault();
 
-        if (string.IsNullOrEmpty(headerValue)) {
-            string failureReason = "No authorization header found";
-            Logger.LogWarning("Authentication failed: {Reason} - Path: {Path}", failureReason, Request.Path.Value);
-            return AuthenticateResult.Fail(failureReason);
-        }
+        if (string.IsNullOrEmpty(headerValue) && Request.Query.TryGetValue("access_token", out var queryToken))
+            headerValue = $"Bearer {queryToken}";
+
+        if (string.IsNullOrEmpty(headerValue))
+            return AuthenticateResult.NoResult();
 
         string[] bearer = headerValue.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 

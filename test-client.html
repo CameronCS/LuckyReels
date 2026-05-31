@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lucky Reels — Hub Test Client</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+  <style>
+    body { font-family: monospace; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #111; color: #eee; }
+    h2 { color: #f0a500; }
+    h3 { color: #aaa; margin-top: 24px; }
+    input, select { background: #222; color: #eee; border: 1px solid #444; padding: 6px 8px; margin: 4px; border-radius: 4px; }
+    button { background: #f0a500; color: #111; border: none; padding: 7px 14px; margin: 4px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button:disabled { background: #555; color: #888; cursor: default; }
+    #log { background: #1a1a1a; border: 1px solid #333; padding: 12px; height: 280px; overflow-y: auto; white-space: pre-wrap; font-size: 13px; border-radius: 4px; }
+    .ok  { color: #4caf50; }
+    .err { color: #f44336; }
+    .evt { color: #29b6f6; }
+    .sep { color: #555; }
+    #status { font-size: 13px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<h2>Lucky Reels — Hub Test Client</h2>
+
+<!-- Auth -->
+<h3>1. Auth</h3>
+<input id="apiBase" value="https://localhost:7211" style="width:200px" placeholder="API base URL" />
+<br/>
+<input id="authName" placeholder="Username" value="testplayer" />
+<input id="authPass" placeholder="Password" type="password" value="Password1!" />
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+<span id="tokenStatus" style="font-size:12px;color:#888;margin-left:8px;"></span>
+
+<!-- Hub -->
+<h3>2. Connect</h3>
+<div id="status">Not connected</div>
+<button id="btnConnect" onclick="connect()">Connect to /game</button>
+<button id="btnDisconnect" onclick="disconnect()" disabled>Disconnect</button>
+
+<!-- Slots -->
+<h3>Slots</h3>
+<input id="slotMachine" type="number" value="1" style="width:60px" placeholder="Machine" />
+<input id="slotBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="spinSlots()">Spin</button>
+
+<!-- Blackjack -->
+<h3>Blackjack</h3>
+<input id="bjBet" type="number" value="200" style="width:80px" placeholder="Bet" />
+<button onclick="bjDeal()">Deal</button>
+<button onclick="bjHit()">Hit</button>
+<button onclick="bjStand()">Stand</button>
+
+<!-- Roulette -->
+<h3>Roulette</h3>
+<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+  <input id="rlBetKey" placeholder="Bet key (e.g. red, straight-5, col-1)" style="width:220px" value="red" />
+  <input id="rlBetAmt" type="number" value="100" style="width:80px" placeholder="Amount" />
+  <button onclick="addRlBet()">Add Bet</button>
+  <button onclick="clearRlBets()">Clear Bets</button>
+  <button onclick="spinRoulette()">Spin</button>
+</div>
+<div id="rlBetList" style="font-size:12px;color:#aaa;min-height:18px"></div>
+
+<!-- Horse Racing -->
+<h3>Horse Racing</h3>
+<select id="horsePick">
+  <option>Thunder Bolt</option>
+  <option>Lucky Strike</option>
+  <option>Iron Duke</option>
+  <option>Wild Fire</option>
+  <option>Night Shadow</option>
+  <option>Silver Fox</option>
+</select>
+<input id="horseBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="raceHorse()">Race</button>
+
+<!-- Log -->
+<h3>Log</h3>
+<button onclick="clearLog()">Clear</button>
+<div id="log"></div>
+
+<script>
+  let connection = null;
+  let token = null;
+
+  function log(msg, cls = '') {
+    const el = document.getElementById('log');
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+  function apiBase() { return document.getElementById('apiBase').value.replace(/\/$/, ''); }
+
+  async function register() {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1.0/Auth/Register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('authName').value,
+          email: `${document.getElementById('authName').value}@test.com`,
+          password: document.getElementById('authPass').value
+        })
+      });
+      const data = await res.json();
+      if (data.token) { token = data.token; document.getElementById('tokenStatus').textContent = '✓ token stored'; }
+      log('Register → ' + JSON.stringify(data), res.ok ? 'ok' : 'err');
+    } catch (e) { log('Register error: ' + e.message, 'err'); }
+  }
+
+  async function login() {
+    try {
+      const res = await fetch(`${apiBase()}/api/v1/Auth/LoginPlayer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('authName').value,
+          password: document.getElementById('authPass').value
+        })
+      });
+      const data = await res.json();
+      if (data.token) { token = data.token; document.getElementById('tokenStatus').textContent = '✓ token stored'; }
+      log('Login → ' + JSON.stringify(data), res.ok ? 'ok' : 'err');
+    } catch (e) { log('Login error: ' + e.message, 'err'); }
+  }
+
+  async function connect() {
+    if (!token) { log('Login first to get a token.', 'err'); return; }
+
+    connection = new signalR.HubConnectionBuilder()
+      .withUrl(`${apiBase()}/game`, { accessTokenFactory: () => token })
+      .withAutomaticReconnect()
+      .build();
+
+    connection.on('SlotResult',      d => log('SlotResult → '      + JSON.stringify(d), 'evt'));
+    connection.on('BlackjackState',  d => log('BlackjackState → '  + JSON.stringify(d), 'evt'));
+    connection.on('BlackjackResult', d => log('BlackjackResult → ' + JSON.stringify(d), 'evt'));
+    connection.on('RouletteResult',  d => log('RouletteResult → '  + JSON.stringify(d), 'evt'));
+    connection.on('HorseResult',     d => log('HorseResult → '     + JSON.stringify(d), 'evt'));
+    connection.on('Error',           d => log('HubError → '        + JSON.stringify(d), 'err'));
+
+    try {
+      await connection.start();
+      document.getElementById('status').textContent = '● Connected';
+      document.getElementById('status').style.color = '#4caf50';
+      document.getElementById('btnConnect').disabled = true;
+      document.getElementById('btnDisconnect').disabled = false;
+      log('Connected to /game hub', 'ok');
+    } catch (e) { log('Connect failed: ' + e.message, 'err'); }
+  }
+
+  async function disconnect() {
+    await connection.stop();
+    document.getElementById('status').textContent = 'Not connected';
+    document.getElementById('status').style.color = '#eee';
+    document.getElementById('btnConnect').disabled = false;
+    document.getElementById('btnDisconnect').disabled = true;
+    log('Disconnected', 'sep');
+  }
+
+  async function invoke(method, ...args) {
+    if (!connection) { log('Not connected.', 'err'); return; }
+    try {
+      log(`→ ${method}(${args.map(a => JSON.stringify(a)).join(', ')})`, 'sep');
+      await connection.invoke(method, ...args);
+    } catch (e) { log(`${method} error: ${e.message}`, 'err'); }
+  }
+
+  function spinSlots() {
+    invoke('SpinSlots',
+      parseInt(document.getElementById('slotMachine').value),
+      parseInt(document.getElementById('slotBet').value));
+  }
+
+  function bjDeal()  { invoke('BlackjackDeal', parseInt(document.getElementById('bjBet').value)); }
+  function bjHit()   { invoke('BlackjackHit'); }
+  function bjStand() { invoke('BlackjackStand'); }
+
+  let rlBets = [];
+  function addRlBet() {
+    const key = document.getElementById('rlBetKey').value.trim();
+    const amt = parseInt(document.getElementById('rlBetAmt').value);
+    if (!key || !amt) return;
+    rlBets.push({ key, amount: amt });
+    document.getElementById('rlBetList').textContent = rlBets.map(b => `${b.key}: ${b.amount}`).join('  |  ');
+  }
+  function clearRlBets() { rlBets = []; document.getElementById('rlBetList').textContent = ''; }
+  function spinRoulette() {
+    if (!rlBets.length) { log('Add at least one bet first.', 'err'); return; }
+    invoke('SpinRoulette', rlBets);
+    clearRlBets();
+  }
+
+  function raceHorse() {
+    invoke('RaceHorse',
+      document.getElementById('horsePick').value,
+      parseInt(document.getElementById('horseBet').value));
+  }
+</script>
+</body>
+</html>

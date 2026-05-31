@@ -20,7 +20,8 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
       "Bash(dir \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" /s /b)",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\\\\Common\\\\CommonObjects\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
-      "Bash(dotnet build *)"
+      "Bash(dotnet build *)",
+      "PowerShell(Stop-Process *)"
     ]
   }
 }

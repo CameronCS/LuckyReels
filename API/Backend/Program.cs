@@ -8,6 +8,7 @@ using SystemFramework.Exceptions;
 using SystemFramework.JWTAuthentication;
 using SystemFramework.Security;
 using SystemFramework.SignalR;
+using WebSocketServicePoint;
 
 namespace Backend;
 
@@ -15,8 +16,26 @@ public class Program {
     public static void Main(string[] args) {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddControllers();
-        builder.Services.AddSignalR();
+        string redisConnection = builder.Configuration.GetConnectionString("Redis");
+        bool useRedis = !string.IsNullOrEmpty(redisConnection);
+
+        builder.Services.AddControllers(options => options.Conventions.Add(new APIGateWay.GatewayControllerConvention()));
+
+        builder.Services.AddCors(options => {
+            options.AddDefaultPolicy(policy => policy
+                .SetIsOriginAllowed(_ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials());
+        });
+
+        ISignalRServerBuilder signalR = builder.Services.AddSignalR();
+        if (useRedis) signalR.AddStackExchangeRedis(redisConnection);
+
+        if (useRedis)
+            builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConnection);
+        else
+            builder.Services.AddDistributedMemoryCache();
 
         builder.Services.AddJWTAuthentication(options => {
             options.PrivateKey = builder.Configuration.GetValue<string>("JwtKey");
@@ -26,7 +45,7 @@ public class Program {
             options.AssumeDefaultVersionWhenUnspecified = true;
             options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
             options.ReportApiVersions = true;
-        });
+        }).AddMvc();
 
         builder.Services.AddActiveTenantService();
 
@@ -35,6 +54,18 @@ public class Program {
 
         builder.Services.AddTransient<BusinessLogicServiceInterface.IAuthService, BusinessLogicService.AuthService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IAuthService, DataAccessService.AuthService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.ISlotService, BusinessLogicService.SlotService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.ISlotDataService, DataAccessService.SlotDataService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IBlackjackService, BusinessLogicService.BlackjackService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IBlackjackDataService, DataAccessService.BlackjackDataService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IRouletteService, BusinessLogicService.RouletteService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IRouletteDataService, DataAccessService.RouletteDataService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IHorseService, BusinessLogicService.HorseService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IHorseDataService, DataAccessService.HorseDataService>();
 
         builder.Services.AddSingleton(sp => {
             ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
@@ -66,10 +97,12 @@ public class Program {
 
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseHttpsRedirection();
+        app.UseRouting();
+        app.UseCors();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapHub<SystemHub>("/hub");
-        app.UseAuthorization();
+        app.MapHub<GameHub>("/game");
         app.MapControllers();
         app.Run();
     }

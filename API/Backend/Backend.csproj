@@ -9,14 +9,16 @@
 
 	<ItemGroup>
 		<PackageReference Include="AutoMapper" Version="16.1.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -28,5 +30,6 @@
 		<ProjectReference Include="..\Services\APIGateWay\APIGateWay.csproj" />
 		<ProjectReference Include="..\Services\BusinessLogicService\BusinessLogicService.csproj" />
 		<ProjectReference Include="..\Services\DataAccessService\DataAccessService.csproj" />
+		<ProjectReference Include="..\Services\WebSocketServicePoint\WebSocketServicePoint.csproj" />
 	</ItemGroup>
 </Project>
