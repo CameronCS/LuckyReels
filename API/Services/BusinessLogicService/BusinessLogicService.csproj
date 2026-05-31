@@ -6,4 +6,17 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\CommonObjects\CommonObjects.csproj" />
+	  <ProjectReference Include="..\..\Common\Models\Models.csproj" />
+	  <ProjectReference Include="..\..\Common\SystemFramework\SystemFramework.csproj" />
+	  <ProjectReference Include="..\..\Database\DatabaseEntities\DatabaseEntities.csproj" />
+	  <ProjectReference Include="..\..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
+	  <ProjectReference Include="..\..\ServiceInterfaces\DataAccessServiceInterface\DataAccessServiceInterface.csproj" />
+	</ItemGroup>
+
 </Project>
