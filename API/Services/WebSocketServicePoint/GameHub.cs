@@ -96,7 +96,8 @@ public class GameHub(IServiceProvider services) : Hub
     public async Task MinesReveal(int cellIndex)
     {
         MinesState state = await Game<IMinesService>().RevealAsync(PlayerId, cellIndex);
-        await Clients.Caller.SendAsync(HubEvents.MinesState, state);
+        string evt = state.IsGameOver ? HubEvents.MinesResult : HubEvents.MinesState;
+        await Clients.Caller.SendAsync(evt, state);
     }
 
     public async Task MinesCashout()
@@ -116,9 +117,9 @@ public class GameHub(IServiceProvider services) : Hub
     public async Task CrashBet(int bet)
         => await Game<ICrashService>().PlaceBetAsync(PlayerId, bet);
 
-    public async Task CrashCashout(double currentMultiplier)
+    public async Task CrashCashout()
     {
-        CrashResult result = await Game<ICrashService>().CashoutAsync(PlayerId, currentMultiplier);
+        CrashResult result = await Game<ICrashService>().CashoutAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.CrashResult, result);
     }
 

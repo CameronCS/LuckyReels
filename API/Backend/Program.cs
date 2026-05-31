@@ -67,6 +67,20 @@ public class Program {
         builder.Services.AddTransient<BusinessLogicServiceInterface.IHorseService, BusinessLogicService.HorseService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IHorseDataService, DataAccessService.HorseDataService>();
 
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IBaccaratService, BusinessLogicService.BaccaratService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IBaccaratDataService, DataAccessService.BaccaratDataService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IMinesService, BusinessLogicService.MinesService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IMinesDataService, DataAccessService.MinesDataService>();
+
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IPlinkoService, BusinessLogicService.PlinkoService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IPlinkoDataService, DataAccessService.PlinkoDataService>();
+
+        builder.Services.AddSingleton<BusinessLogicServiceInterface.ICrashGameStore, BusinessLogicService.GameState.CrashGameStore>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.ICrashService, BusinessLogicService.CrashService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.ICrashDataService, DataAccessService.CrashDataService>();
+        builder.Services.AddHostedService<WebSocketServicePoint.CrashGameWorker>();
+
         builder.Services.AddSingleton(sp => {
             ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
             MapperConfiguration mapperConfiguration = new(cfg => {

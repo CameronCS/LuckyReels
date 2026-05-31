@@ -6,4 +6,8 @@ public class MinesState
     public double Multiplier { get; set; }
     public int Bet { get; set; }
     public int Balance { get; set; }
+    public bool IsGameOver { get; set; }
+    public bool HitMine { get; set; }
+    public bool[] Grid { get; set; } = [];
+    public int Net { get; set; }
 }

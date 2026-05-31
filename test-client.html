@@ -76,6 +76,43 @@
 <input id="horseBet" type="number" value="100" style="width:80px" placeholder="Bet" />
 <button onclick="raceHorse()">Race</button>
 
+<!-- Baccarat -->
+<h3>Baccarat</h3>
+<select id="bacBetType">
+  <option value="player">Player</option>
+  <option value="banker">Banker</option>
+  <option value="tie">Tie</option>
+</select>
+<input id="bacBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="baccaratBet()">Bet</button>
+
+<!-- Crash -->
+<h3>Crash</h3>
+<div id="crashPhase" style="font-size:13px;color:#f0a500;margin-bottom:4px">Phase: —</div>
+<div id="crashMultiplier" style="font-size:22px;font-weight:bold;color:#4caf50;margin-bottom:6px">—</div>
+<input id="crashBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="crashBet()">Place Bet</button>
+<button onclick="crashCashout()">Cash Out</button>
+
+<!-- Mines -->
+<h3>Mines</h3>
+<input id="minesMines" type="number" value="3" style="width:60px" placeholder="Mines" min="1" max="24" />
+<input id="minesBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="minesStart()">Start</button>
+<button onclick="minesCashout()">Cash Out</button>
+<br/>
+<div id="minesGrid" style="display:grid;grid-template-columns:repeat(5,44px);gap:4px;margin-top:8px"></div>
+
+<!-- Plinko -->
+<h3>Plinko</h3>
+<select id="plinkoRisk">
+  <option value="low">Low</option>
+  <option value="medium" selected>Medium</option>
+  <option value="high">High</option>
+</select>
+<input id="plinkoBet" type="number" value="100" style="width:80px" placeholder="Bet" />
+<button onclick="dropPlinko()">Drop</button>
+
 <!-- Log -->
 <h3>Log</h3>
 <button onclick="clearLog()">Clear</button>
@@ -144,6 +181,20 @@
     connection.on('BlackjackResult', d => log('BlackjackResult → ' + JSON.stringify(d), 'evt'));
     connection.on('RouletteResult',  d => log('RouletteResult → '  + JSON.stringify(d), 'evt'));
     connection.on('HorseResult',     d => log('HorseResult → '     + JSON.stringify(d), 'evt'));
+    connection.on('BaccaratResult',  d => log('BaccaratResult → '  + JSON.stringify(d), 'evt'));
+    connection.on('CrashPhase', phase => {
+      document.getElementById('crashPhase').textContent = 'Phase: ' + phase;
+      if (phase === 'betting') document.getElementById('crashMultiplier').textContent = '—';
+      log('CrashPhase → ' + phase, 'sep');
+    });
+    connection.on('CrashTick', d => {
+      document.getElementById('crashMultiplier').textContent = d.multiplier + 'x' + (d.crashed ? ' 💥' : '');
+      document.getElementById('crashMultiplier').style.color = d.crashed ? '#f44336' : '#4caf50';
+    });
+    connection.on('CrashResult',     d => log('CrashResult → '     + JSON.stringify(d), 'evt'));
+    connection.on('MinesState',      d => { log('MinesState → ' + JSON.stringify(d), 'evt'); renderMinesGrid(d.revealed, null, false); });
+    connection.on('MinesResult',     d => { log('MinesResult → ' + JSON.stringify(d), 'evt'); renderMinesGrid(d.revealed, d.grid, d.hitMine); });
+    connection.on('PlinkoResult',    d => log('PlinkoResult → '    + JSON.stringify(d), 'evt'));
     connection.on('Error',           d => log('HubError → '        + JSON.stringify(d), 'err'));
 
     try {
@@ -153,6 +204,7 @@
       document.getElementById('btnConnect').disabled = true;
       document.getElementById('btnDisconnect').disabled = false;
       log('Connected to /game hub', 'ok');
+      await connection.invoke('CrashJoin');
     } catch (e) { log('Connect failed: ' + e.message, 'err'); }
   }
 
@@ -202,6 +254,52 @@
     invoke('RaceHorse',
       document.getElementById('horsePick').value,
       parseInt(document.getElementById('horseBet').value));
+  }
+
+  function baccaratBet() {
+    invoke('BaccaratBet',
+      document.getElementById('bacBetType').value,
+      parseInt(document.getElementById('bacBet').value));
+  }
+
+  function crashBet()     { invoke('CrashBet',     parseInt(document.getElementById('crashBet').value)); }
+  function crashCashout() { invoke('CrashCashout'); }
+
+  function minesStart() {
+    renderMinesGrid([], null, false);
+    invoke('MinesStart',
+      parseInt(document.getElementById('minesMines').value),
+      parseInt(document.getElementById('minesBet').value));
+  }
+  function minesCashout() { invoke('MinesCashout'); }
+  function minesReveal(idx) { invoke('MinesReveal', idx); }
+
+  function renderMinesGrid(revealed, grid, hitMine) {
+    const el = document.getElementById('minesGrid');
+    el.innerHTML = '';
+    for (let i = 0; i < 25; i++) {
+      const btn = document.createElement('button');
+      btn.style.cssText = 'width:44px;height:44px;font-size:16px;padding:0';
+      const isMine   = grid && grid[i];
+      const isRevealed = revealed && revealed.includes(i);
+      if (isMine) {
+        btn.textContent = '💣';
+        btn.style.background = '#c62828';
+      } else if (isRevealed) {
+        btn.textContent = '💎';
+        btn.style.background = '#1b5e20';
+      } else {
+        btn.textContent = '?';
+        btn.onclick = () => minesReveal(i);
+      }
+      el.appendChild(btn);
+    }
+  }
+
+  function dropPlinko() {
+    invoke('DropPlinko',
+      parseInt(document.getElementById('plinkoBet').value),
+      document.getElementById('plinkoRisk').value);
   }
 </script>
 </body>

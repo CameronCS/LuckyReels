@@ -16,6 +16,7 @@ public static class HubEvents
     public const string MinesState       = "MinesState";
     public const string MinesResult      = "MinesResult";
 
+    public const string CrashPhase       = "CrashPhase";
     public const string CrashTick        = "CrashTick";
     public const string CrashResult      = "CrashResult";
 
