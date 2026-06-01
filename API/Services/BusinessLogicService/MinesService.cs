@@ -1,5 +1,5 @@
 using AutoMapper;
-using BusinessLogicService.Engines;
+using GameEngines;
 using BusinessLogicService.GameState;
 using BusinessLogicServiceInterface;
 using CommonObjects.Games;

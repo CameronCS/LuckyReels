@@ -19,10 +19,11 @@
     <Project Path="API/Services/APIGateWay/APIGateWay.csproj" />
     <Project Path="API/Services/BusinessLogicService/BusinessLogicService.csproj" />
     <Project Path="API/Services/DataAccessService/DataAccessService.csproj" />
+    <Project Path="API/Services/GameEngines/GameEngines.csproj" Id="b6dbbb0f-9595-4d81-9ed1-c8503fe3bb22" />
     <Project Path="API/Services/WebSocketServicePoint/WebSocketServicePoint.csproj" />
   </Folder>
   <Folder Name="/Frontend/">
-    <Project Path="Client/Client.esproj">
+    <Project Path="LuckyReelsClient/luckyreelsclient.esproj">
       <Build />
       <Deploy />
     </Project>

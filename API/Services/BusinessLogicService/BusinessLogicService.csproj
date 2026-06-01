@@ -19,6 +19,7 @@
 	  <ProjectReference Include="..\..\Database\DatabaseEntities\DatabaseEntities.csproj" />
 	  <ProjectReference Include="..\..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
 	  <ProjectReference Include="..\..\ServiceInterfaces\DataAccessServiceInterface\DataAccessServiceInterface.csproj" />
+	  <ProjectReference Include="..\GameEngines\GameEngines.csproj" />
 	</ItemGroup>
 
 </Project>
