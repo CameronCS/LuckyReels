@@ -4,11 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
+using SystemFramework.SignalR;
 
 namespace WebSocketServicePoint;
 
 [Authorize]
-public class GameHub(IServiceProvider services) : Hub
+public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IAdminBroadcastService adminBroadcast) : Hub
 {
     private Guid PlayerId => Guid.Parse(Context.User.FindFirst(ClaimTypes.Sid).Value);
 
@@ -22,6 +23,8 @@ public class GameHub(IServiceProvider services) : Hub
     public override async Task OnConnectedAsync()
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, "Online");
+        onlineTracker.Add(PlayerId);
+        await adminBroadcast.PlayerOnlineStatus(PlayerId, true);
         int tokens = await Game<IAuthService>().GetTokensAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.TokensUpdated, tokens);
         await base.OnConnectedAsync();
@@ -31,6 +34,8 @@ public class GameHub(IServiceProvider services) : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Online");
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Crash");
+        onlineTracker.Remove(PlayerId);
+        await adminBroadcast.PlayerOnlineStatus(PlayerId, false);
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -52,7 +57,8 @@ public class GameHub(IServiceProvider services) : Hub
     public async Task BlackjackDeal(int bet)
     {
         BlackjackState state = await Game<IBlackjackService>().DealAsync(PlayerId, bet);
-        await Clients.Caller.SendAsync(HubEvents.BlackjackState, state);
+        string evt = state.IsGameOver ? HubEvents.BlackjackResult : HubEvents.BlackjackState;
+        await Clients.Caller.SendAsync(evt, state);
     }
 
     public async Task BlackjackHit()

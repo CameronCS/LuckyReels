@@ -15,7 +15,8 @@ public class CrashService(
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
     IMapper mapper,
-    ICrashGameStore store)
+    ICrashGameStore store,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), ICrashService
 {
     public async Task PlaceBetAsync(Guid playerId, int bet, CancellationToken ct = default)
@@ -26,7 +27,11 @@ public class CrashService(
         if (!store.TryPlaceBet(playerId, bet))
             throw new InvalidOperationException("Betting is closed for this round.");
 
-        await _dataLayerService.UpdatePlayerTokensAsync(playerId, player.Tokens - bet, ct);
+        int newBalance = player.Tokens - bet;
+        await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "crash", new { phase = "bet", bet });
     }
 
     public async Task<CrashResult> CashoutAsync(Guid playerId, CancellationToken ct = default)
@@ -43,6 +48,16 @@ public class CrashService(
         UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
         int newBalance    = player.Tokens + winnings;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "crash", new
+        {
+            phase      = "cashout",
+            bet,
+            net,
+            cashedOutAt,
+            crashPoint = store.CrashPoint
+        });
 
         return new CrashResult
         {

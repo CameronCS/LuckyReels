@@ -15,7 +15,8 @@ public class SlotService(
     IDataLayerService dataLayerService,
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
-    IMapper mapper)
+    IMapper mapper,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), ISlotService
 {
     public async Task<SlotResult> SpinAsync(Guid playerId, int machineNum, int bet, CancellationToken ct = default)
@@ -39,6 +40,18 @@ public class SlotService(
             SpinType   = resultType,
             CreatedAt  = DateTime.UtcNow
         }, ct);
+
+        int net = winAmount - bet;
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "slots", new
+        {
+            machineNum,
+            symbols,
+            bet,
+            winAmount,
+            net,
+            resultType
+        });
 
         return new SlotResult
         {

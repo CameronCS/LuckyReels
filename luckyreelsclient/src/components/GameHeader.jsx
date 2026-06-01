@@ -1,18 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useHub } from '../hub'
 
 export default function GameHeader({ title, tagline, accentColor, gradient }) {
   const { tokens, playerName } = useHub()
   const navigate = useNavigate()
-  const [bump, setBump] = useState(false)
-  const prev = useState(tokens)[0]
+  const [bump,  setBump]  = useState(false)
+  const [delta, setDelta] = useState(null)
+  const prevRef = useRef(tokens)
 
   useEffect(() => {
+    const diff = tokens - prevRef.current
+    prevRef.current = tokens
+    if (diff !== 0) setDelta(diff)
     setBump(true)
     const t = setTimeout(() => setBump(false), 400)
     return () => clearTimeout(t)
   }, [tokens])
+
+  useEffect(() => {
+    if (delta === null) return
+    const t = setTimeout(() => setDelta(null), 1400)
+    return () => clearTimeout(t)
+  }, [delta])
 
   return (
     <div className="game-header" style={{ '--accent': accentColor }}>
@@ -28,7 +38,14 @@ export default function GameHeader({ title, tagline, accentColor, gradient }) {
         <div className="player-pill" style={{ color: accentColor }}>{playerName}</div>
         <div className="tokens-box">
           <div className="tokens-box-label">🪙 Tokens</div>
-          <div className={`tokens-value${bump ? ' bump' : ''}`}>{tokens}</div>
+          <div style={{ position: 'relative' }}>
+            <div className={`tokens-value${bump ? ' bump' : ''}`}>{tokens.toLocaleString()}</div>
+            {delta !== null && delta !== 0 && (
+              <div className={`tokens-delta${delta > 0 ? ' delta-pos' : ' delta-neg'}`}>
+                {delta > 0 ? `+${delta.toLocaleString()}` : delta.toLocaleString()}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

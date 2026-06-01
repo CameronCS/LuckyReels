@@ -99,8 +99,8 @@ public partial class App_DBContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
-            entity.Property(e => e.DealerCards).HasMaxLength(120);
-            entity.Property(e => e.PlayerCards).HasMaxLength(120);
+            entity.Property(e => e.DealerCards).HasMaxLength(500);
+            entity.Property(e => e.PlayerCards).HasMaxLength(500);
             entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
             entity.Property(e => e.Result).HasMaxLength(15);
 

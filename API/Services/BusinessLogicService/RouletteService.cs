@@ -15,7 +15,8 @@ public class RouletteService(
     IDataLayerService dataLayerService,
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
-    IMapper mapper)
+    IMapper mapper,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IRouletteService
 {
     public async Task<RouletteResult> SpinAsync(Guid playerId, List<RouletteBet> bets, CancellationToken ct = default)
@@ -39,9 +40,13 @@ public class RouletteService(
             CreatedAt = DateTime.UtcNow
         }, ct);
 
+        string winNumber = RouletteEngine.FormatWinNumber(winNum);
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "roulette", new { winNumber, totalBet, net });
+
         return new RouletteResult
         {
-            WinNumber   = RouletteEngine.FormatWinNumber(winNum),
+            WinNumber   = winNumber,
             TotalBet    = totalBet,
             Net         = net,
             NewBalance  = newBalance,

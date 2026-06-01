@@ -118,7 +118,7 @@ export default function Home() {
               </div>
               <div className="hub-tokens">
                 <div className="hub-tokens-label">🪙 Tokens</div>
-                <div className="hub-tokens-value">{tokens}</div>
+                <div className="hub-tokens-value">{tokens.toLocaleString()}</div>
               </div>
               <button className="hub-logout-btn" onClick={disconnect}>Logout</button>
             </div>

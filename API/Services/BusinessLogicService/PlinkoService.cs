@@ -15,7 +15,8 @@ public class PlinkoService(
     IDataLayerService dataLayerService,
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
-    IMapper mapper)
+    IMapper mapper,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IPlinkoService
 {
     public async Task<PlinkoResult> DropAsync(Guid playerId, int bet, string riskLevel, CancellationToken ct = default)
@@ -28,6 +29,9 @@ public class PlinkoService(
         int winAmount  = net + bet;
         int newBalance = player.Tokens - bet + winAmount;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "plinko", new { riskLevel, slot, mult, bet, net });
 
         return new PlinkoResult
         {

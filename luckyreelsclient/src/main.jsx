@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { HubProvider } from './hub'
+import { HubProvider, useHub } from './hub'
 import './index.css'
 import Home      from './pages/Home'
 import Slots     from './pages/Slots'
@@ -11,9 +11,26 @@ import Baccarat  from './pages/Baccarat'
 import Mines     from './pages/Mines'
 import Crash     from './pages/Crash'
 import Plinko    from './pages/Plinko'
+import Admin     from './pages/Admin'
+
+function NotificationToasts() {
+  const { notifications, dismissNotification } = useHub()
+  if (!notifications.length) return null
+  return (
+    <div className="notif-stack">
+      {notifications.map(n => (
+        <div key={n.id} className={`notif-toast notif-${n.type ?? 'info'}`}>
+          <span className="notif-msg">{n.message}</span>
+          <button className="notif-close" onClick={() => dismissNotification(n.id)}>×</button>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 createRoot(document.getElementById('root')).render(
   <HubProvider>
+    <NotificationToasts />
     <BrowserRouter>
       <Routes>
         <Route path="/"          element={<Home />} />
@@ -25,6 +42,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/mines"     element={<Mines />} />
         <Route path="/crash"     element={<Crash />} />
         <Route path="/plinko"    element={<Plinko />} />
+        <Route path="/admin"     element={<Admin />} />
       </Routes>
     </BrowserRouter>
   </HubProvider>

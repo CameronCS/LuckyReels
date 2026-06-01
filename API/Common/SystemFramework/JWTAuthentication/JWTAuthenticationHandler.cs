@@ -60,7 +60,15 @@ public class JWTAuthenticationHandler(IOptionsMonitor<JWTAuthenticationOptions> 
                 return AuthenticateResult.Fail(failureReason);
             }
 
-            ClaimsPrincipal claimsPrincipal = new(result.ClaimsIdentity);
+            // Normalise short-form claim types emitted by JsonWebTokenHandler
+            // ("role" → ClaimTypes.Role) so [Authorize(Roles="...")] works correctly.
+            var claims = result.ClaimsIdentity.Claims
+                .Select(c => c.Type is "role" or "roles"
+                    ? new Claim(ClaimTypes.Role, c.Value)
+                    : c);
+
+            var identity = new ClaimsIdentity(claims, Scheme.Name, ClaimTypes.Name, ClaimTypes.Role);
+            ClaimsPrincipal claimsPrincipal = new(identity);
             AuthenticationTicket ticket = new(claimsPrincipal, Scheme.Name);
             return AuthenticateResult.Success(ticket);
         } catch (Exception ex) {

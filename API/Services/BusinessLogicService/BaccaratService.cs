@@ -16,7 +16,8 @@ public class BaccaratService(
     IDataLayerService dataLayerService,
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
-    IMapper mapper)
+    IMapper mapper,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IBaccaratService
 {
     public async Task<BaccaratResult> BetAsync(Guid playerId, string betType, int bet, CancellationToken ct = default)
@@ -40,6 +41,9 @@ public class BaccaratService(
             Net        = net,
             CreatedAt  = DateTime.UtcNow
         }, ct);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "baccarat", new { betType, outcome, bet, net });
 
         return new BaccaratResult
         {

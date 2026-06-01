@@ -19,7 +19,8 @@ public class MinesService(
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
     IMapper mapper,
-    IDistributedCache cache)
+    IDistributedCache cache,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IMinesService
 {
     private static string StateKey(Guid playerId) => $"mines:{playerId}";
@@ -59,6 +60,9 @@ public class MinesService(
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
         await SaveStateAsync(playerId, state);
 
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "mines", new { phase = "start", mineCount, bet });
+
         return new MinesState
         {
             Revealed   = [],
@@ -83,6 +87,15 @@ public class MinesService(
         if (state.Grid[cellIndex])
         {
             await ClearStateAsync(playerId);
+
+            await adminBroadcast.GameEvent(playerId, "mines", new
+            {
+                phase     = "explode",
+                mineCount = state.MineCount,
+                bet       = state.Bet,
+                net       = -state.Bet,
+                revealed  = state.Revealed.Count
+            });
 
             return new MinesState
             {
@@ -122,6 +135,17 @@ public class MinesService(
         int newBalance    = player.Tokens + winAmount;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
         await ClearStateAsync(playerId);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "mines", new
+        {
+            phase      = "cashout",
+            mineCount  = state.MineCount,
+            bet        = state.Bet,
+            net,
+            multiplier,
+            revealed   = state.Revealed.Count
+        });
 
         return new MinesResult
         {

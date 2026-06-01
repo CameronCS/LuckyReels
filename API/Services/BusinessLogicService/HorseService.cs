@@ -15,7 +15,8 @@ public class HorseService(
     IDataLayerService dataLayerService,
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
-    IMapper mapper)
+    IMapper mapper,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IHorseService
 {
     public async Task<HorseResult> RaceAsync(Guid playerId, string pickedHorse, int bet, CancellationToken ct = default)
@@ -40,6 +41,9 @@ public class HorseService(
             Net        = net,
             CreatedAt  = DateTime.UtcNow
         }, ct);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "horse", new { winnerName, pickedHorse, bet, net });
 
         return new HorseResult
         {

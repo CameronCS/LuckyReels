@@ -65,14 +65,8 @@ export default function Horse() {
     const winIdx = HORSES.findIndex(h => h.name === msg.winnerName)
     if (winIdx < 0) return
 
-    // Build speeds so winIdx always crosses the finish first
-    const base  = 0.88 + Math.random() * 0.12
-    const speeds = HORSES.map(() => base + (Math.random() - 0.5) * 0.30)
-    const maxSp  = Math.max(...speeds)
-    speeds[winIdx] = maxSp + 0.15
-    for (let i = 0; i < 6; i++) {
-      if (i !== winIdx) speeds[i] = Math.min(speeds[i], maxSp * 0.92)
-    }
+    // All horses start tight — winner is steered in the final stretch, not from the gate
+    const speeds = HORSES.map(() => 1.0 + (Math.random() - 0.5) * 0.04)
 
     posRef.current         = new Array(6).fill(0)
     speedsRef.current      = speeds
@@ -100,8 +94,16 @@ export default function Horse() {
     // Advance horses
     for (let i = 0; i < 6; i++) {
       if (pos[i] >= 100) continue
-      const noise = (Math.random() - 0.5) * 0.09
-      pos[i] = Math.min(100, pos[i] + 0.27 * speedsRef.current[i] + noise)
+      let sp = speedsRef.current[i]
+      if (winnerRef.current < 0) {
+        if (i === targetWinner && pos[i] > 78) {
+          sp *= 1.20  // winner surges in the home stretch
+        } else if (i !== targetWinner && pos[i] - pos[targetWinner] > 3) {
+          sp *= 0.85  // non-winner fades if it drifts too far ahead
+        }
+      }
+      const noise = (Math.random() - 0.5) * 0.15
+      pos[i] = Math.min(100, pos[i] + 0.27 * sp + noise)
       if (pos[i] >= 100 && !finishOrder.current.includes(i)) {
         finishOrder.current.push(i)
         if (winnerRef.current < 0) winnerRef.current = i

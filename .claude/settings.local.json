@@ -33,7 +33,8 @@
       "PowerShell(dotnet build *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Directory)",
       "Bash(Select-Object Name)",
-      "PowerShell(head *)"
+      "PowerShell(head *)",
+      "Bash(dotnet run *)"
     ]
   }
 }

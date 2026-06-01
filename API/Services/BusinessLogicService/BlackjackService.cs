@@ -19,7 +19,8 @@ public class BlackjackService(
     ActiveTenantService activeTenantService,
     IHubContext<SystemHub> systemHub,
     IMapper mapper,
-    IDistributedCache cache)
+    IDistributedCache cache,
+    IAdminBroadcastService adminBroadcast)
     : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IBlackjackService
 {
     private static string StateKey(Guid playerId) => $"blackjack:{playerId}";
@@ -61,7 +62,48 @@ public class BlackjackService(
 
         int newBalance = player.Tokens - bet;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
+
+        // Natural blackjack — resolve immediately, no state to save
+        if (BlackjackEngine.HandValue(state.PlayerHand) == 21)
+        {
+            string result    = BlackjackEngine.Resolve(state.PlayerHand, state.DealerHand);
+            int    payout    = BlackjackEngine.Payout(result, bet);
+            int    net       = BlackjackEngine.Net(result, bet);
+            int    finalBal  = newBalance + payout;
+
+            await _dataLayerService.UpdatePlayerTokensAsync(playerId, finalBal, ct);
+            await _dataLayerService.AddBlackjackLogAsync(new LogBlackjack
+            {
+                PlayerId    = playerId,
+                Result      = result,
+                PlayerCards = JsonSerializer.Serialize(state.PlayerHand),
+                DealerCards = JsonSerializer.Serialize(state.DealerHand),
+                Bet         = bet,
+                Net         = net,
+                CreatedAt   = DateTime.UtcNow
+            }, ct);
+
+            await adminBroadcast.TokenUpdate(playerId, player.Name, finalBal);
+            await adminBroadcast.GameEvent(playerId, "blackjack", new { phase = "result", result, bet, net });
+
+            return new BlackjackState
+            {
+                PlayerHand  = [.. state.PlayerHand],
+                DealerHand  = [.. state.DealerHand],
+                PlayerTotal = 21,
+                DealerTotal = BlackjackEngine.HandValue(state.DealerHand),
+                Bet         = bet,
+                Balance     = finalBal,
+                IsGameOver  = true,
+                Result      = result,
+                Net         = net,
+            };
+        }
+
         await SaveStateAsync(playerId, state);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "blackjack", new { phase = "deal", bet });
 
         return BuildState(state, newBalance);
     }
@@ -90,6 +132,8 @@ public class BlackjackService(
             }, ct);
 
             await ClearStateAsync(playerId);
+
+            await adminBroadcast.GameEvent(playerId, "blackjack", new { phase = "result", result = "bust", bet = state.Bet, net });
 
             return new BlackjackState
             {
@@ -137,6 +181,9 @@ public class BlackjackService(
         }, ct);
 
         await ClearStateAsync(playerId);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "blackjack", new { phase = "result", result, bet = state.Bet, net });
 
         return new BlackjackResult
         {

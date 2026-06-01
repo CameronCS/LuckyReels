@@ -55,6 +55,10 @@ public class Program {
         builder.Services.AddTransient<BusinessLogicServiceInterface.IAuthService, BusinessLogicService.AuthService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IAuthService, DataAccessService.AuthService>();
 
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IAdminService, BusinessLogicService.AdminService>();
+        builder.Services.AddScoped<DataAccessServiceInterface.IAdminDataService, DataAccessService.AdminDataService>();
+        builder.Services.AddSingleton<BusinessLogicServiceInterface.IAdminBroadcastService, WebSocketServicePoint.AdminBroadcastService>();
+
         builder.Services.AddTransient<BusinessLogicServiceInterface.ISlotService, BusinessLogicService.SlotService>();
         builder.Services.AddScoped<DataAccessServiceInterface.ISlotDataService, DataAccessService.SlotDataService>();
 
@@ -100,6 +104,7 @@ public class Program {
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
+        builder.Services.AddSingleton<SystemFramework.SignalR.IOnlineTracker, SystemFramework.SignalR.OnlineTracker>();
         builder.Services.AddSingleton<IUserIdProvider, IdBasedNameIdentifier>();
 
         WebApplication app = builder.Build();
@@ -117,6 +122,7 @@ public class Program {
         app.UseAuthorization();
         app.MapHub<SystemHub>("/hub");
         app.MapHub<GameHub>("/game");
+        app.MapHub<WebSocketServicePoint.AdminHub>("/adminhub");
         app.MapControllers();
         app.Run();
     }
