@@ -128,10 +128,16 @@ export default function Horse() {
             }
         }
 
-        // Compute rank of each horse
-        const sorted = [...pos.keys()].sort((a, b) => pos[b] - pos[a])
+        // Compute rank of each horse — finished horses are locked by finishOrder
+        const numFinished = finishOrder.current.length
+        const unfinished = []
+        for (let i = 0; i < 6; i++) {
+            if (!finishOrder.current.includes(i)) unfinished.push(i)
+        }
+        unfinished.sort((a, b) => pos[b] - pos[a])
         const rankOf = new Array(6)
-        sorted.forEach((hi, rank) => { rankOf[hi] = rank })
+        finishOrder.current.forEach((hi, rank) => { rankOf[hi] = rank })
+        unfinished.forEach((hi, idx) => { rankOf[hi] = numFinished + idx })
 
         // ── Direct DOM updates — zero React overhead ──────────────────
         for (let i = 0; i < 6; i++) {
@@ -149,7 +155,7 @@ export default function Horse() {
         }
 
         if (winnerRef.current < 0) {
-            domStatus(`${HORSES[sorted[0]].name} leads!`, 'racing')
+            domStatus(`${HORSES[unfinished[0]].name} leads!`, 'racing')
         }
 
         if (winnerRef.current >= 0) {

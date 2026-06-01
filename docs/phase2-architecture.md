@@ -1,97 +1,71 @@
-# Lucky Reels — Phase 2 Architecture
+# Lucky Reels — Architecture
 
 ## Overview
 
-Full rewrite from Node.js + Vanilla JS to .NET backend + Angular frontend.  
-Architecture mirrors an enterprise N-tier pattern: **FE → API → BLL → DAL**
+.NET 10 backend + React (Vite) frontend.  
+Architecture follows an N-tier pattern: **FE → SignalR Hub → BLL → DAL**
 
 ---
 
 ## Frontend
 
-**Framework:** Angular  
-**Reason:** Native browser JS for smooth gambling animations (crash curve, plinko physics, slot reels). Compiles to static files — CDN deployable, infinitely scalable. Pairs seamlessly with .NET via `@microsoft/signalr`.
+**Framework:** React 18 + Vite  
+**Real-time:** `@microsoft/signalr`  
+**Routing:** React Router DOM
 
-### Workspace Structure
-
-Mirrors the Blazor multi-project pattern using an Angular workspace with libraries.
-
-| Blazor Project | Angular Equivalent |
-|---|---|
-| **Frontend** | `apps/lucky-reels` — app entry point, routing, `AppModule` |
-| **HTTP Clients** | `libs/signalr-clients` — typed SignalR hub wrapper services |
-| **Components** | `libs/ui-components` — shared reusable Angular components |
-| **Models** (shared) | `libs/models` — TypeScript interfaces mirroring .NET Models/DTOs |
+### Structure
 
 ```
-lucky-reels-client/                  ← Angular workspace root
-├── apps/
-│   └── lucky-reels/                 ← Frontend project
-│       └── src/app/
-│           ├── pages/               ← one routed component per game
-│           │   ├── slots/
-│           │   ├── blackjack/
-│           │   ├── roulette/
-│           │   ├── horse/
-│           │   ├── baccarat/
-│           │   ├── mines/
-│           │   ├── crash/
-│           │   ├── plinko/
-│           │   └── admin/
-│           ├── app.routes.ts
-│           └── app.component.ts
-├── libs/
-│   ├── signalr-clients/             ← HTTP Clients equivalent
-│   │   ├── hub.service.ts           ← owns the single HubConnection
-│   │   ├── auth-client.service.ts
-│   │   ├── slots-client.service.ts
-│   │   ├── blackjack-client.service.ts
-│   │   ├── roulette-client.service.ts
-│   │   ├── horse-client.service.ts
-│   │   ├── baccarat-client.service.ts
-│   │   ├── mines-client.service.ts
-│   │   ├── crash-client.service.ts
-│   │   ├── plinko-client.service.ts
-│   │   └── admin-client.service.ts
-│   ├── ui-components/               ← Components project
-│   │   ├── bet-input/
-│   │   ├── token-display/
-│   │   ├── playing-card/
-│   │   ├── back-button/
-│   │   └── ...
-│   └── models/                      ← TypeScript interfaces mirroring .NET Models
-│       ├── player.model.ts
-│       ├── slot-result.model.ts
-│       ├── blackjack-state.model.ts
-│       ├── roulette-result.model.ts
-│       ├── crash-state.model.ts
-│       └── ...
-└── angular.json
+luckyreelsclient/src/
+├── hub.jsx              HubProvider context — owns both SignalR connections
+├── main.jsx             App entry point, route definitions, notification toasts
+├── pages/               One component per route
+│   ├── Home.jsx         Lobby / game selection
+│   ├── Slots.jsx
+│   ├── Blackjack.jsx
+│   ├── Roulette.jsx
+│   ├── Horse.jsx
+│   ├── Baccarat.jsx
+│   ├── Mines.jsx
+│   ├── Crash.jsx
+│   ├── Plinko.jsx
+│   └── Admin.jsx
+└── components/          Shared UI
+    ├── GameHeader.jsx
+    └── Stars.jsx
 ```
 
 ### Key Rules
 
-- **`hub.service.ts`** owns the single `HubConnection` — all client services inject it, none create their own connection.
-- **Pages are thin** — inject a client service, bind to a component, wire them together. No hub logic in pages.
-- **`libs/models`** is kept in sync with the .NET `Models` and `BLLInterface` DTOs by hand. These are TypeScript interfaces only — no logic.
-- **`libs/ui-components`** holds anything reused across two or more game pages (cards, bet inputs, token display, back button).
+- **`hub.jsx` owns both connections** — `/game` (GameHub) and `/hub` (SystemHub). Pages call `useHub()` only; none create their own connection.
+- **JWT stored in localStorage** under keys `lr_token` and `lr_user`.
+- **Animation-heavy games use DOM refs** (Horse rAF loop, Crash canvas, Plinko physics) to bypass React re-renders mid-frame. React state is only updated at phase boundaries (idle → racing → result).
 
 ---
 
 ## Backend Solution Structure
 
+All backend projects live under `API/`.
+
 ```
-LuckyReels.sln
-├── Backend
-├── ApiGateway
-├── WebSocketService
-├── BLL
-├── BLLInterface
-├── DAL
-├── DALInterface
-├── SystemFramework
-├── Models
-└── DatabaseEntities
+API/
+├── Backend/                              ASP.NET Core host
+├── Common/
+│   ├── CommonObjects/                    Shared request/response DTOs
+│   ├── Models/                           Domain models
+│   └── SystemFramework/                  JWT auth, SignalR utilities, base infrastructure
+├── Database/
+│   ├── DatabaseEntities/                 EF Core entities + App_DBContext
+│   └── MigrationHandler/                 EF Core code-first migrations
+├── ServiceInterfaces/
+│   ├── BusinessLogicServiceInterface/    BLL interfaces + BLL-level DTOs
+│   └── DataAccessServiceInterface/       DAL interfaces
+└── Services/
+    ├── APIGateWay/                        HTTP controllers
+    ├── BusinessLogicService/              BLL implementations + game state stores
+    ├── DataAccessService/                 DAL implementations
+    ├── GameEngines/                       Pure stateless game logic
+    └── WebSocketServicePoint/             SignalR hubs + background workers
 ```
 
 ---
@@ -100,16 +74,19 @@ LuckyReels.sln
 
 | Project | Type | Owns |
 |---|---|---|
-| **Backend** | ASP.NET Core host | `Program.cs`, DI registration, composition root — brings all projects together |
-| **ApiGateway** | Class library | HTTP controllers, auth middleware, REST endpoints |
-| **WebSocketService** | Class library | SignalR hub(s) — thin routers only, no business logic |
-| **BLL** | Class library | Concrete service implementations, game engines (pure logic) |
-| **BLLInterface** | Class library | Service interfaces + BLL-level request/response DTOs |
-| **DAL** | Class library | Repository implementations, entity↔model mapping — uses `DbContext` from `DatabaseEntities` |
-| **DALInterface** | Class library | Repository interfaces — all signatures use Models, never entities |
-| **SystemFramework** | Class library | Base classes, shared utilities, common exceptions, result types |
+| **Backend** | ASP.NET Core host | `Program.cs`, DI registration, composition root |
+| **CommonObjects** | Class library | Shared request/response DTOs used across layers |
 | **Models** | Class library | Plain domain objects — the BLL's view of the world, no EF Core attributes |
-| **DatabaseEntities** | Class library | EF Core entity classes + scaffolded `DbContext` — auto-generated by EF Core Power Tools from the live DB |
+| **SystemFramework** | Class library | JWT auth pipeline, `IOnlineTracker`, `IUserIdProvider`, base infrastructure |
+| **DatabaseEntities** | Class library | EF Core entity classes + `App_DBContext` |
+| **MigrationHandler** | Class library | EF Core code-first migrations (applied automatically on startup) |
+| **BusinessLogicServiceInterface** | Class library | BLL service interfaces (`ISlotService`, `IHorseService`, etc.) |
+| **DataAccessServiceInterface** | Class library | DAL service interfaces (`ISlotDataService`, etc.) |
+| **APIGateWay** | Class library | HTTP controllers (`AuthGateway`, `AdminGateway`, `ErrorGateway`) |
+| **BusinessLogicService** | Class library | BLL implementations + in-memory game state (`BlackjackGameState`, `MinesGameState`, `CrashGameStore`) |
+| **DataAccessService** | Class library | DAL implementations — EF Core queries, entity↔model mapping |
+| **GameEngines** | Class library | Pure stateless game logic (`SlotsEngine`, `HorseEngine`, etc.) — no I/O, no DI |
+| **WebSocketServicePoint** | Class library | SignalR hubs (`GameHub`, `AdminHub`, `SystemHub`), `CrashGameWorker`, `AdminBroadcastService` |
 
 ---
 
@@ -117,44 +94,54 @@ LuckyReels.sln
 
 ```
 Backend (composition root)
-├── refs ApiGateway
-├── refs WebSocketService
-├── refs BLL          ← to register concrete implementations
-└── refs DAL          ← to register concrete implementations
+├── refs APIGateWay
+├── refs WebSocketServicePoint
+├── refs BusinessLogicService     ← to register concrete implementations
+└── refs DataAccessService        ← to register concrete implementations
 
-ApiGateway
-├── refs BLLInterface
+APIGateWay
+├── refs BusinessLogicServiceInterface
+├── refs CommonObjects
 └── refs SystemFramework
 
-WebSocketService
-├── refs BLLInterface
+WebSocketServicePoint
+├── refs BusinessLogicServiceInterface
+├── refs CommonObjects
 └── refs SystemFramework
 
-BLL
-├── refs BLLInterface    ← implements these interfaces
-├── refs DALInterface    ← depends on, never on DAL directly
+BusinessLogicService
+├── refs BusinessLogicServiceInterface   ← implements these interfaces
+├── refs DataAccessServiceInterface      ← depends on, never on DataAccessService directly
+├── refs GameEngines                     ← pure logic, no I/O
 ├── refs Models
 └── refs SystemFramework
 
-BLLInterface
+BusinessLogicServiceInterface
+├── refs Models
+├── refs CommonObjects
+└── refs SystemFramework
+
+DataAccessService
+├── refs DataAccessServiceInterface      ← implements these interfaces
+├── refs DatabaseEntities               ← gets entities + DbContext here, maps to Models internally
 ├── refs Models
 └── refs SystemFramework
 
-DAL
-├── refs DALInterface      ← implements these interfaces
-├── refs DatabaseEntities  ← gets entities + DbContext from here, maps to/from Models internally
+DataAccessServiceInterface
 ├── refs Models
 └── refs SystemFramework
 
-DALInterface
-├── refs Models            ← all repo signatures use Models, not entities
-└── refs SystemFramework
+GameEngines
+└── (no internal refs — pure logic, zero dependencies)
 
 Models
 └── refs SystemFramework
 
-DatabaseEntities           ← auto-generated by EF Core Power Tools from live DB
+DatabaseEntities
 └── refs SystemFramework
+
+MigrationHandler
+└── refs DatabaseEntities
 
 SystemFramework
 └── (no internal refs — base layer, referenced by everything)
@@ -162,92 +149,83 @@ SystemFramework
 
 ---
 
+## SignalR Hubs
+
+| Hub | Route | Used by |
+|---|---|---|
+| `GameHub` | `/game` | All game actions (spin, bet, hit, etc.) and results |
+| `AdminHub` | `/adminhub` | Admin broadcast — live activity pushed to the admin panel |
+| `SystemHub` | `/hub` | System notifications (hourly bonus alerts, etc.) |
+
+---
+
 ## Key Rules
 
-- **Backend** is the only project that references both an interface and its concrete implementation simultaneously — it is the sole composition root.
-- **DatabaseEntities** is walled off — only `DAL` references it. Nothing above the DAL knows EF Core exists.
-- **DatabaseEntities** is database-first — scaffolded automatically by EF Core Power Tools from the live MySQL schema. Re-scaffold when the DB schema changes; do not hand-edit generated files.
-- **DAL** maps `DatabaseEntities` → `Models` internally before returning data. The BLL only ever works with `Models`.
-- **WebSocketService / ApiGateway** call only `BLLInterface` — they have zero knowledge of how business logic is implemented.
-- Swapping the database engine touches only `DAL` and `DatabaseEntities`.
+- **Backend is the sole composition root** — the only project that references both an interface and its concrete implementation simultaneously.
+- **DatabaseEntities is walled off** — only `DataAccessService` references it. Nothing above the DAL knows EF Core exists.
+- **GameEngines are pure** — no I/O, no DI, called directly by `BusinessLogicService`. Swapping an engine touches only that file.
+- **DAL maps entities → Models** internally before returning data. The BLL only ever works with `Models`.
+- **WebSocketServicePoint / APIGateWay** call only `BusinessLogicServiceInterface` — zero knowledge of BLL implementation.
 
 ---
 
 ## Data Flow Example — Slots Spin
 
 ```
-Angular
-  → SignalR Hub (WebSocketService)
-    → ISlotService.SpinAsync(playerId, bet, machineNum)   [BLLInterface]
-      → SlotsEngine.Spin(bet)                              [BLL — pure logic, no I/O]
-      → IUnitOfWork.BeginTransactionAsync()                [DALInterface]
-      → IPlayerRepository.UpdateTokensAsync(model)         [DALInterface]
-      → IGameLogRepository.AddSpinLogAsync(model)          [DALInterface]
-      → IUnitOfWork.CommitAsync()                          [DALInterface]
-      → return SlotResultDto                               [BLLInterface]
-    → hub sends result to caller + broadcasts to admins
+React (luckyreelsclient)
+  → conn.invoke('SpinSlots', machineNum, bet)
+    → GameHub (WebSocketServicePoint)
+      → ISlotService.SpinAsync(playerId, bet, machineNum)    [BusinessLogicServiceInterface]
+        → SlotsEngine.Spin(bet)                               [GameEngines — pure logic]
+        → ISlotDataService.LogSpinAsync(model)                [DataAccessServiceInterface]
+        → ISlotDataService.UpdateBalanceAsync(model)          [DataAccessServiceInterface]
+        → return SlotResult                                   [CommonObjects]
+      → hub sends SlotResult to caller
+      → AdminBroadcastService pushes activity to /adminhub
 ```
-
----
-
-## Games to Migrate
-
-| Game | Current File | Engine Class |
-|---|---|---|
-| Slots | `games/slots.js` | `SlotsEngine.cs` |
-| Blackjack | `games/blackjack.js` | `BlackjackEngine.cs` |
-| Roulette | `games/roulette.js` | `RouletteEngine.cs` |
-| Horse Racing | `games/horse.js` | `HorseEngine.cs` |
-| Baccarat | `games/baccarat.js` | `BaccaratEngine.cs` |
-| Mines | `games/mines.js` | `MinesEngine.cs` |
-| Crash | `games/crash.js` | `CrashEngine.cs` |
-| Plinko | `games/plinko.js` | `PlinkoEngine.cs` |
 
 ---
 
 ## Stateful Games (In-Memory State)
 
-Blackjack, Mines, and Crash maintain mid-game state (hand in progress, grid revealed, crash timer). This state lives in singleton stores in the **BLL**.
+Blackjack, Mines, and Crash maintain mid-game state in singleton stores inside `BusinessLogicService`.
 
 | Store | Holds |
 |---|---|
-| `BlackjackGameStore` | Active hands keyed by player ID |
-| `MinesGameStore` | Active grids + revealed cells keyed by player ID |
-| `CrashGameStore` | Active crash timers + bet info keyed by player ID |
-| `OnlinePlayerStore` | Connected players + token cache keyed by player ID |
-| `SessionStore` | Token → player ID map (mirrors DB sessions in memory) |
+| `BlackjackGameState` | Active hands keyed by player ID |
+| `MinesGameState` | Active grids + revealed cells keyed by player ID |
+| `CrashGameStore` | Active crash timer + bets keyed by player ID |
 
 ---
 
 ## Background Services
 
-| Service | Behaviour |
-|---|---|
-| `HourlyBonusWorker` | `BackgroundService`, runs every 5 min, awards 10,000 tokens to players who haven't received a bonus in the last hour |
-| Session cleanup | On startup, deletes expired sessions from DB |
+| Service | Location | Behaviour |
+|---|---|---|
+| `CrashGameWorker` | `WebSocketServicePoint` | `BackgroundService` — drives the crash game loop, broadcasts multiplier updates, settles bets |
+| DB migration | `Backend` startup | `context.Database.Migrate()` applies any pending migrations on boot |
 
 ---
 
 ## Database
 
 **Engine:** Microsoft SQL Server  
-**ORM:** EF Core with Microsoft.EntityFrameworkCore.SqlServer  
-**Scaffolding:** EF Core Power Tools — reverse-engineers the live DB to auto-generate entities and `DbContext` into `DatabaseEntities`  
-**Schema changes:** Make changes directly in the DB, then re-run Power Tools to regenerate `DatabaseEntities`. No migration files.  
-**Note:** Phase 1 runs on MySQL — the existing schema will need to be ported to MSSQL before scaffolding (key differences: `CHAR(36)` → `UNIQUEIDENTIFIER`, `AUTO_INCREMENT` → `IDENTITY`, `DATETIME` → `DATETIME2`).
+**ORM:** EF Core 10  
+**Migration strategy:** Code-first — migrations live in `MigrationHandler`, applied automatically on startup via `context.Database.Migrate()`
+
+To add a migration:
+
+```bash
+dotnet ef migrations add <Name> --project API/Database/MigrationHandler --startup-project API/Backend
+```
 
 ---
 
-## Implementation Order (Suggested)
+## Redis (Optional)
 
-1. `SystemFramework` — base types, result wrapper, common exceptions  
-2. `Models` — domain objects  
-3. `DatabaseEntities` — run EF Core Power Tools against live DB to scaffold entities + `DbContext`  
-4. `DALInterface` — repository interfaces  
-5. `DAL` — repo implementations, entity↔model mapping (uses scaffolded `DbContext`)  
-6. `BLLInterface` — service interfaces + DTOs  
-7. `BLL` — game engines first (pure logic), then services  
-8. `WebSocketService` — SignalR hub wired to BLL interfaces  
-9. `ApiGateway` — HTTP endpoints if needed  
-10. `Backend` — DI wiring, `Program.cs`, launch  
-11. Angular frontend — per-game components against the hub  
+Set `ConnectionStrings:Redis` in `appsettings.json` to enable:
+
+- SignalR Redis backplane (scale-out across multiple backend instances)
+- `IDistributedCache` backed by Redis instead of in-memory
+
+Leave it empty for single-instance local dev.

@@ -1,0 +1,362 @@
+# Lucky Reels Casino — Claude Context
+
+## Stack
+
+- **Backend:** .NET 10, ASP.NET Core, SignalR, EF Core (code-first, MSSQL), AutoMapper, BCrypt.Net, JWT
+- **Frontend:** React 18, Vite (port 3000), `@microsoft/signalr`, React Router DOM
+- **Optional:** Redis for SignalR backplane + `IDistributedCache`
+- **Backend URL:** `https://localhost:7211`
+
+## Running locally
+
+```bash
+# Backend — auto-applies pending EF migrations on start
+cd API/Backend && dotnet run
+
+# Frontend — Vite proxies /api, /game, /hub, /adminhub → backend
+cd luckyreelsclient && npm run dev    # http://localhost:3000
+```
+
+`appsettings.json` keys: `ConnectionStrings:DefaultConnection` (MSSQL), `ConnectionStrings:Redis` (leave empty for in-memory), `JwtKey` (≥32 chars), `AutoMapperKey`.
+
+Vite also allows host `nonpublic-apogamously-cameron.ngrok-free.dev` for ngrok tunnelling.
+
+---
+
+## Backend project map (`API/`)
+
+```
+Backend/                              Composition root — DI wiring, Program.cs only
+Common/
+  CommonObjects/                      Request/response DTOs shared across all layers
+  Models/                             Plain domain objects — BLL's view of the world, no EF attributes
+  SystemFramework/                    JWT pipeline, ActiveTenantService, IOnlineTracker, IUserIdProvider,
+                                      ExceptionHandlingMiddleware, SystemHub
+Database/
+  DatabaseEntities/                   EF Core entity classes (Usr*, Log*, Err*) + App_DBContext
+  MigrationHandler/                   Code-first migrations; applied automatically via Migrate() on startup
+ServiceInterfaces/
+  BusinessLogicServiceInterface/      BLL service interfaces + ICrashGameStore
+  DataAccessServiceInterface/         DAL service interfaces + IBaseDataLayerService
+Services/
+  APIGateWay/                         HTTP controllers — suffix "Gateway" stripped by GatewayControllerConvention
+  GameEngines/                        Pure stateless RNG/rules — zero dependencies, zero I/O
+  BusinessLogicService/               BLL implementations + BlackjackGameState/MinesGameState/CrashGameStore
+  DataAccessService/                  DAL — EF Core queries, entity↔model mapping via AutoMapper
+  WebSocketServicePoint/              GameHub/AdminHub + CrashGameWorker + AdminBroadcastService + HubEvents
+```
+
+### Strict dependency rule
+
+```
+Backend → everything (sole composition root)
+APIGateWay / WebSocketServicePoint → BusinessLogicServiceInterface + CommonObjects + SystemFramework
+BusinessLogicService → BLLInterface + DALInterface + GameEngines + Models + SystemFramework
+DataAccessService → DALInterface + DatabaseEntities + Models + SystemFramework
+GameEngines → nothing
+DatabaseEntities → only touched by DataAccessService
+```
+
+---
+
+## BLL service pattern
+
+Every BLL service uses a `using` alias and inherits `BaseBusinessServiceWithDataService<T>`:
+
+```csharp
+using IDataLayerService = DataAccessServiceInterface.ISlotDataService;
+
+public class SlotService(IDataLayerService dal, ActiveTenantService ats,
+    IHubContext<SystemHub> hub, IMapper mapper, IAdminBroadcastService adminBroadcast)
+    : BaseBusinessServiceWithDataService<IDataLayerService>(dal, ats, hub, mapper), ISlotService { … }
+```
+
+`BaseBusinessServiceWithDataService` exposes: `_dataLayerService`, `_activeTenantService`, `_systemHub`, `_mapper`.
+
+**Standard game method sequence:**
+1. Load `UsrPlayer` from DAL → validate `player.Tokens >= bet`
+2. Call `GameEngine` (pure, no I/O)
+3. Compute `newBalance = player.Tokens - bet + winAmount`
+4. `await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct)`
+5. `await _dataLayerService.AddXxxLogAsync(new LogXxx { … CreatedAt = DateTime.UtcNow }, ct)`
+6. `await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance)`
+7. `await adminBroadcast.GameEvent(playerId, "gameName", new { … })`
+8. Return `XxxResult { …, NewBalance = newBalance }`
+
+---
+
+## DAL service pattern
+
+Inherits `BaseDataService(App_DBContext, ActiveTenantService)` → exposes `_context`.
+
+- **Reads:** `FirstOrDefaultAsync`, `Where(…).ToListAsync()` — globally `NoTracking`
+- **Updates:** `ExecuteUpdateAsync` (no `SaveChanges` needed)
+- **Inserts:** `AddAsync` + `SaveChangesAsync`
+
+---
+
+## HTTP API (APIGateWay)
+
+Route: `api/v{v:apiVersion}/[Controller]/[Action]` — `GatewayControllerConvention` strips the `Gateway` suffix.
+
+| Method | Endpoint | Auth | Body / Params |
+|---|---|---|---|
+| POST | `api/v1/Auth/Register` | Anon | `{ Name, Email, Password }` |
+| POST | `api/v1/Auth/LoginPlayer` | Anon | `{ Username, Password }` |
+| POST | `api/v1/Auth/LoginAdmin` | Anon | `{ Username, Password }` |
+| GET | `api/v1/Admin/Players` | Admin | `?page=1&pageSize=50&search=` |
+| POST | `api/v1/Admin/SetTokens` | Admin | `{ PlayerId, Tokens }` |
+| POST | `api/v1/Admin/Broadcast` | Admin | `{ Type, Message }` |
+
+`AuthenticationResponse`: `{ token, userId, userName, isAuthenticated }`
+
+---
+
+## JWT
+
+Generated by `JWTTokenGenerator.Generate(userId, userName, role, privateKey)`. Expires **8 hours**.
+
+| Claim | Value |
+|---|---|
+| `ClaimTypes.Sid` | Player/Admin `Guid` as string — used as SignalR user ID via `IdBasedNameIdentifier` |
+| `ClaimTypes.Name` | Display name |
+| `ClaimTypes.UserData` | `"1"` = Admin, `"0"` = Player |
+| `ClaimTypes.Role` | `"Player"` or `"Admin"` |
+
+`ActiveTenantService` reads these from `IHttpContextAccessor`. In hubs: `Guid.Parse(Context.User.FindFirst(ClaimTypes.Sid).Value)`.
+
+Passwords: BCrypt (60-char hash, max 72-char input).
+
+---
+
+## SignalR hubs
+
+| Hub | Route | Auth | Groups |
+|---|---|---|---|
+| `GameHub` | `/game` | `[Authorize]` | `"Online"` (all), `"Crash"` (opt-in) |
+| `AdminHub` | `/adminhub` | `[Authorize(Roles="Admin")]` | `"Admins"`, `"watch-{playerId}"` |
+| `SystemHub` | `/hub` | `[Authorize]` | — |
+
+`GameHub.OnConnectedAsync`: adds to `"Online"` group, calls `onlineTracker.Add`, broadcasts online status to admins, sends `TokensUpdated` to caller.
+
+`AdminHub`: exposes `WatchPlayer(playerId)` / `UnwatchPlayer(playerId)` — adds/removes connection from `"watch-{playerId}"` group for live per-player activity.
+
+### GameHub invoke names (client → server)
+
+```
+SpinSlots(machineNum, bet)
+BlackjackDeal(bet) · BlackjackHit() · BlackjackStand()
+SpinRoulette(bets[])
+RaceHorse(horseName, bet)
+BaccaratBet(betType, bet)
+MinesStart(mineCount, bet) · MinesReveal(cellIndex) · MinesCashout()
+CrashJoin() · CrashLeave() · CrashBet(bet) · CrashCashout()
+DropPlinko(bet, riskLevel)
+GetTokens()
+```
+
+### Hub events (server → client) — constants in `HubEvents.cs`
+
+```
+TokensUpdated       int
+SlotResult          { symbols[], winAmount, resultType, newBalance }
+BlackjackState      { playerHand[], dealerVisible, playerTotal, dealerVisibleTotal, bet, balance, isGameOver?, result?, net? }
+BlackjackResult     { playerHand[], dealerHand[], playerTotal, dealerTotal, result, net, bet, newBalance }
+RouletteResult      { winNumber, totalBet, net, newBalance, winningBets[] }
+HorseResult         { winnerName, pickedName, bet, net, newBalance }
+BaccaratResult      { playerHand[], bankerHand[], betType, outcome, bet, net, newBalance }
+MinesState          { revealed[], multiplier, bet, balance, isGameOver, hitMine, grid[]?, net? }
+MinesResult         { grid[], revealed[], net, newBalance }
+CrashPhase          "betting" | "running"
+CrashTick           { multiplier, crashed }
+CrashResult         { crashedAt, cashedOutAt, bet, net, newBalance }
+PlinkoResult        { path[], slot, multiplier, winAmount, net, newBalance }
+Error               string
+```
+
+### AdminBroadcastService — events pushed to AdminHub
+
+```
+"PlayerTokenUpdate"  → group "Admins"           { playerId, name, tokens }
+"PlayerGameEvent"    → group "watch-{playerId}"  { playerId, game, data, time }
+"PlayerOnlineStatus" → group "Admins"            { playerId, isOnline }
+```
+
+`NotifyPlayerTokensUpdated` → pushes `TokensUpdated` back through `GameHub` to the specific player.
+`BroadcastNotificationAsync` / `NotifyPlayerAsync` → `"Notification"` event through `SystemHub`.
+
+---
+
+## Stateful games
+
+### Blackjack & Mines — IDistributedCache
+
+| Cache key | TTL | Cleared on |
+|---|---|---|
+| `blackjack:{playerId}` | 30 min | Natural 21, bust, stand, push |
+| `mines:{playerId}` | 30 min | Hit mine, cashout |
+
+State is serialised JSON. `GetStateAsync` throws `InvalidOperationException("No active … game.")` if key missing — this surfaces as a `HubException`.
+
+### Crash — CrashGameStore (singleton)
+
+`lock`-guarded singleton. Phases: `Betting → Running → Crashed`.
+
+`CrashGameWorker` loop (in `WebSocketServicePoint`):
+1. `store.Reset()` → `CrashPhase "betting"` → **10 s** wait
+2. `store.StartRound()` → `CrashPhase "running"`
+3. `store.Tick()` every **100 ms** → `CrashTick { multiplier, crashed }` until crashed
+4. **3 s** cooldown → repeat
+
+**Crash token flow:** bet deducted immediately in `PlaceBetAsync`; winnings credited in `CashoutAsync` (`winnings = bet * currentMultiplier`). If player doesn't cashout, tokens are already gone — no further deduction needed.
+
+---
+
+## Game engine details
+
+### Slots (`SlotsEngine`)
+Symbols (rarest → most common): 💎(w=1) 7️⃣(3) 🍀(5) ⭐(8) 🍒(12) 🍋(15) 🍇(18) 🔔(20)
+- 3-of-a-kind → `bet × symbol_payout` (jackpot: 💎=50× down to 🔔=2×), `resultType="jackpot"`
+- 2-of-a-kind → `bet × symbol_payout × 0.5`, `resultType="match"`
+- No match → `winAmount=0`, `resultType="loss"`
+
+### Blackjack (`BlackjackEngine`)
+6-deck shoe; reshuffled mid-game when < 20 cards remain. Ace = 11 (soft) or 1 (hard). Dealer hits ≤ 16.
+Natural 21 on deal → resolved immediately without saving mid-game state.
+
+| result | payout | net |
+|---|---|---|
+| `blackjack` | bet + bet×1.5 | +bet×1.5 |
+| `win` / `dealer_bust` | bet×2 | +bet |
+| `push` | bet | 0 |
+| `bust` / `loss` | 0 | -bet |
+
+### Roulette (`RouletteEngine`)
+38-slot American-style wheel (0, 1-36, 37="00"). Bet keys:
+- `straight-{n}` (n: 0, 1-36, 37) → pays 35:1
+- `col-1/2/3`, `dozen-1/2/3` → pays 2:1
+- `low/high`, `even/odd`, `red/black` → pays 1:1
+Multiple bets allowed per spin; each is evaluated independently.
+
+### Horse Racing (`HorseEngine`)
+6 horses. 10% chance of a blowout round (2-3 horses get very slow speeds).
+Normal round: all horses clustered (baseSpeed 0.88-1.00 ± 0.15). Winner pays **4×**.
+Frontend steers the animation toward the server-determined winner in the final stretch (pos > 78).
+
+### Baccarat (`BaccaratEngine`)
+8-deck shoe. Full tableau drawing rules for banker third card.
+- Bet `"player"`: wins pay 1:1, tie = push (no loss)
+- Bet `"banker"`: wins pay 0.95:1, tie = push
+- Bet `"tie"`: pays 8:1, player/banker result = loss
+
+### Mines (`MinesEngine`)
+5×5 grid (25 cells). `mineCount` range: 1-24.
+`multiplier = floor(0.97 / prob × 100) / 100` where `prob` = probability of having revealed only safe cells.
+Must reveal ≥ 1 cell before cashout; `winAmount = floor(bet × multiplier)`.
+On mine hit: game state cleared, bet lost (tokens already deducted on start).
+
+### Crash (`CrashEngine`)
+`crashPoint = max(1.00, floor(0.99 / (1-r) × 100) / 100)` where r ∈ [0, 1).
+`multiplier(t) = floor(e^(t/8000) × 100) / 100` where t = elapsed ms.
+
+### Plinko (`PlinkoEngine`)
+8 rows, each peg: 50% left (0) / 50% right (1). `slot = sum(path)` → 0 to 8 (9 slots).
+Multipliers by risk:
+- `low`:    [5.6, 2.1, 1.1, 1.0, 0.5, 1.0, 1.1, 2.1, 5.6]
+- `medium`: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13]
+- `high`:   [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29]
+`net = floor(bet × mult) - bet`
+
+---
+
+## Database schema (MSSQL)
+
+| Table | Key columns |
+|---|---|
+| `USR_Players` | `ID` (uniqueidentifier, default newid()), `Name` (varchar 20, unique), `Email` (varchar 254, unique), `PasswordHash` (varchar 60), `Tokens` (int), `CreatedAt` |
+| `USR_Admins` | `ID`, `Username` (varchar 40, unique), `Email` (varchar 254, unique), `PasswordHash` (varchar 60) |
+| `USR_Sessions` | `Token` (PK, not generated), `PlayerID` (FK), `CreatedAt` |
+| `LOG_Spin` | `ID`, `PlayerID` (FK), `MachineNum`, `Symbols` (varchar 40), `Bet`, `WinAmount`, `SpinType` (varchar 10), `CreatedAt` |
+| `LOG_Blackjack` | `ID`, `PlayerID` (FK), `Result` (varchar 15), `PlayerCards` (varchar 500), `DealerCards` (varchar 500), `Bet`, `Net`, `CreatedAt` |
+| `LOG_Roulette` | `ID`, `PlayerID` (FK), `WinNum` (varchar 3), `TotalBet`, `Net`, `CreatedAt` |
+| `LOG_Horse` | `ID`, `PlayerID` (FK), `PickedName` (varchar 30), `WinnerName` (varchar 30), `Bet`, `Net`, `CreatedAt` |
+| `LOG_Baccarat` | `ID`, `PlayerID` (FK), `PlayerHand` (varchar 60), `BankerHand` (varchar 60), `BetType` (varchar 10), `Outcome` (varchar 10), `Bet`, `Net`, `CreatedAt` |
+| `LOG_Admin` | `ID`, `AdminID` (FK), `TargetID`, `Action` (varchar 30), `Detail` (varchar 255), `CreatedAt` |
+| `ERR_Error` | `ID`, `Date`, `Exception`, `Message`, `Host` (varchar 255), `Uri` (varchar 500) |
+
+All log tables: composite index on `(PlayerID, CreatedAt)`. All `CreatedAt` default to `sysdatetime()`.
+
+---
+
+## Exception handling
+
+`ExceptionHandlingMiddleware` wraps every HTTP request. On exception:
+- `TaskCanceledException` / `OperationCanceledException` → logged at Debug, re-thrown (not written to DB)
+- All others → written to `ERR_Error` via `IErrorService`, then re-thrown (returns 500)
+
+Hub exceptions surface as `HubException` to the client (sent as the `Error` event or hub invoke throw).
+
+---
+
+## Frontend
+
+```
+luckyreelsclient/src/
+├── hub.jsx          HubProvider — owns /game (conn) and /hub (notifConnRef) connections
+├── main.jsx         createRoot, BrowserRouter, Routes, NotificationToasts
+├── pages/           Home Slots Blackjack Roulette Horse Baccarat Mines Crash Plinko Admin
+└── components/      GameHeader  Stars
+```
+
+### useHub() returns
+
+```js
+{ conn, isAuthed, tokens, setTokens, playerName,
+  connect, disconnect, notifications, dismissNotification }
+```
+
+- `conn` — `/game` HubConnection for all game invokes and result subscriptions
+- `notifications` — `[{ id, type, message }]`, auto-dismissed after 5 s
+
+### HTTP auth flow (only non-SignalR calls in the app)
+
+```js
+POST /api/v1/Auth/Register      { Name, Email, Password }
+POST /api/v1/Auth/LoginPlayer   { Username, Password }
+// Response → { token, userName } → connect(token, userName) → sets localStorage lr_token/lr_user
+```
+
+### Animation pattern (Horse, Crash, Plinko)
+
+Mutation refs (`posRef`, `speedsRef`, `winnerRef`, canvas refs, etc.) are read/written inside `requestAnimationFrame` loops without touching React state. `setState` only called at phase transitions: `idle → racing → result`. This keeps 60fps smooth.
+
+Horse: `finishOrder` ref accumulates horses as they cross 100%; their rank is locked from the moment they finish — only still-racing horses rank dynamically.
+
+---
+
+## DI lifetime summary
+
+| Service | Lifetime |
+|---|---|
+| All BLL game services | Transient |
+| All DAL services | Scoped |
+| `App_DBContext` | Scoped |
+| `ICrashGameStore`, `IAdminBroadcastService`, `IOnlineTracker`, `IMapper` | Singleton |
+
+---
+
+## Adding a migration
+
+```bash
+dotnet ef migrations add <Name> \
+  --project API/Database/MigrationHandler \
+  --startup-project API/Backend
+```
+
+Applied automatically on next startup via `context.Database.Migrate()`.
+
+---
+
+## Players
+
+New players start with **10,000 tokens**. Admins can set any player's balance via `Admin/SetTokens`. `Admin/Broadcast` sends a `Notification` to all connected players via SystemHub.
