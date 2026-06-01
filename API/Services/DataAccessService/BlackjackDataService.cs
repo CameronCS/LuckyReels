@@ -5,9 +5,7 @@ using SystemFramework.Security;
 
 namespace DataAccessService;
 
-public class BlackjackDataService(App_DBContext context, ActiveTenantService activeTenantService)
-    : BaseDataService(context, activeTenantService), IBlackjackDataService
-{
+public class BlackjackDataService(App_DBContext context, ActiveTenantService activeTenantService) : BaseDataService(context, activeTenantService), IBlackjackDataService {
     public async Task<UsrPlayer> GetPlayerByIdAsync(Guid id, CancellationToken ct = default)
         => await _context.UsrPlayers.FirstOrDefaultAsync(p => p.Id == id, ct);
 
@@ -16,8 +14,7 @@ public class BlackjackDataService(App_DBContext context, ActiveTenantService act
             .Where(p => p.Id == id)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Tokens, tokens), ct);
 
-    public async Task AddBlackjackLogAsync(LogBlackjack log, CancellationToken ct = default)
-    {
+    public async Task AddBlackjackLogAsync(LogBlackjack log, CancellationToken ct = default) {
         await _context.LogBlackjacks.AddAsync(log, ct);
         await _context.SaveChangesAsync(ct);
     }

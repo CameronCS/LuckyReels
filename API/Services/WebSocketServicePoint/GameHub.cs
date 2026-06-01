@@ -9,19 +9,17 @@ using SystemFramework.SignalR;
 namespace WebSocketServicePoint;
 
 [Authorize]
-public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IAdminBroadcastService adminBroadcast) : Hub
-{
+public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IAdminBroadcastService adminBroadcast) : Hub {
     private Guid PlayerId => Guid.Parse(Context.User.FindFirst(ClaimTypes.Sid).Value);
 
-    private T Game<T>()
-    {
+    private T Game<T>() {
         T service = services.GetService<T>();
-        if (service == null) throw new HubException("This game is not yet available.");
+        if (service == null)
+            throw new HubException("This game is not yet available.");
         return service;
     }
 
-    public override async Task OnConnectedAsync()
-    {
+    public override async Task OnConnectedAsync() {
         await Groups.AddToGroupAsync(Context.ConnectionId, "Online");
         onlineTracker.Add(PlayerId);
         await adminBroadcast.PlayerOnlineStatus(PlayerId, true);
@@ -30,8 +28,7 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
-    {
+    public override async Task OnDisconnectedAsync(Exception exception) {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Online");
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Crash");
         onlineTracker.Remove(PlayerId);
@@ -46,75 +43,65 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
 
     // ── Slots ─────────────────────────────────────────────────────────────────
 
-    public async Task SpinSlots(int machineNum, int bet)
-    {
+    public async Task SpinSlots(int machineNum, int bet) {
         SlotResult result = await Game<ISlotService>().SpinAsync(PlayerId, machineNum, bet);
         await Clients.Caller.SendAsync(HubEvents.SlotResult, result);
     }
 
     // ── Blackjack ─────────────────────────────────────────────────────────────
 
-    public async Task BlackjackDeal(int bet)
-    {
+    public async Task BlackjackDeal(int bet) {
         BlackjackState state = await Game<IBlackjackService>().DealAsync(PlayerId, bet);
         string evt = state.IsGameOver ? HubEvents.BlackjackResult : HubEvents.BlackjackState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
-    public async Task BlackjackHit()
-    {
+    public async Task BlackjackHit() {
         BlackjackState state = await Game<IBlackjackService>().HitAsync(PlayerId);
         string evt = state.IsGameOver ? HubEvents.BlackjackResult : HubEvents.BlackjackState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
-    public async Task BlackjackStand()
-    {
+    public async Task BlackjackStand() {
         BlackjackResult result = await Game<IBlackjackService>().StandAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.BlackjackResult, result);
     }
 
     // ── Roulette ──────────────────────────────────────────────────────────────
 
-    public async Task SpinRoulette(List<RouletteBet> bets)
-    {
+    public async Task SpinRoulette(List<RouletteBet> bets) {
         RouletteResult result = await Game<IRouletteService>().SpinAsync(PlayerId, bets);
         await Clients.Caller.SendAsync(HubEvents.RouletteResult, result);
     }
 
     // ── Horse Racing ──────────────────────────────────────────────────────────
 
-    public async Task RaceHorse(string pickedHorse, int bet)
-    {
+    public async Task RaceHorse(string pickedHorse, int bet) {
         HorseResult result = await Game<IHorseService>().RaceAsync(PlayerId, pickedHorse, bet);
         await Clients.Caller.SendAsync(HubEvents.HorseResult, result);
     }
 
     // ── Baccarat ──────────────────────────────────────────────────────────────
 
-    public async Task BaccaratBet(string betType, int bet)
-    {
+    public async Task BaccaratBet(string betType, int bet) {
         BaccaratResult result = await Game<IBaccaratService>().BetAsync(PlayerId, betType, bet);
         await Clients.Caller.SendAsync(HubEvents.BaccaratResult, result);
     }
 
     // ── Mines ─────────────────────────────────────────────────────────────────
 
-    public async Task MinesStart(int mineCount, int bet)
-    {
+    public async Task MinesStart(int mineCount, int bet) {
         MinesState state = await Game<IMinesService>().StartAsync(PlayerId, mineCount, bet);
         await Clients.Caller.SendAsync(HubEvents.MinesState, state);
     }
 
-    public async Task MinesReveal(int cellIndex)
-    {
+    public async Task MinesReveal(int cellIndex) {
         MinesState state = await Game<IMinesService>().RevealAsync(PlayerId, cellIndex);
         string evt = state.IsGameOver ? HubEvents.MinesResult : HubEvents.MinesState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
-    public async Task MinesCashout()
-    {
+    public async Task MinesCashout() {
         MinesResult result = await Game<IMinesService>().CashoutAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.MinesResult, result);
     }
@@ -130,16 +117,14 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     public async Task CrashBet(int bet)
         => await Game<ICrashService>().PlaceBetAsync(PlayerId, bet);
 
-    public async Task CrashCashout()
-    {
+    public async Task CrashCashout() {
         CrashResult result = await Game<ICrashService>().CashoutAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.CrashResult, result);
     }
 
     // ── Plinko ────────────────────────────────────────────────────────────────
 
-    public async Task DropPlinko(int bet, string riskLevel)
-    {
+    public async Task DropPlinko(int bet, string riskLevel) {
         PlinkoResult result = await Game<IPlinkoService>().DropAsync(PlayerId, bet, riskLevel);
         await Clients.Caller.SendAsync(HubEvents.PlinkoResult, result);
     }

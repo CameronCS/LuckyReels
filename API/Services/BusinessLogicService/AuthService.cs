@@ -12,24 +12,16 @@ using IDataLayerService = DataAccessServiceInterface.IAuthService;
 
 namespace BusinessLogicService;
 
-public class AuthService(
-    IDataLayerService dataLayerService,
-    ActiveTenantService activeTenantService,
-    IHubContext<SystemHub> systemHub,
-    IMapper mapper,
-    IConfiguration configuration)
-    : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IAuthService
-{
+public class AuthService(IDataLayerService dataLayerService, ActiveTenantService activeTenantService, IHubContext<SystemHub> systemHub, IMapper mapper, IConfiguration configuration) : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IAuthService {
     private string JwtKey => configuration.GetValue<string>("JwtKey")!;
 
-    public async Task<AuthenticationResponse> LoginPlayerAsync(AuthenticationRequest request, CancellationToken ct = default)
-    {
+    public async Task<AuthenticationResponse> LoginPlayerAsync(AuthenticationRequest request, CancellationToken ct = default) {
         UsrPlayer entity = await _dataLayerService.GetPlayerByNameAsync(request.Username, ct);
-        if (entity is null || !BCrypt.Net.BCrypt.Verify(request.Password, entity.PasswordHash))
+        if (entity is null || !BCrypt.Net.BCrypt.Verify(request.Password, entity.PasswordHash)) {
             return new AuthenticationResponse { IsAuthenticated = false };
+        }
 
-        return new AuthenticationResponse
-        {
+        return new AuthenticationResponse {
             IsAuthenticated = true,
             UserId = entity.Id.ToString(),
             UserName = entity.Name,
@@ -37,14 +29,13 @@ public class AuthService(
         };
     }
 
-    public async Task<AuthenticationResponse> LoginAdminAsync(AuthenticationRequest request, CancellationToken ct = default)
-    {
+    public async Task<AuthenticationResponse> LoginAdminAsync(AuthenticationRequest request, CancellationToken ct = default) {
         UsrAdmin entity = await _dataLayerService.GetAdminByUsernameAsync(request.Username, ct);
-        if (entity is null || !BCrypt.Net.BCrypt.Verify(request.Password, entity.PasswordHash))
+        if (entity is null || !BCrypt.Net.BCrypt.Verify(request.Password, entity.PasswordHash)) {
             return new AuthenticationResponse { IsAuthenticated = false };
+        }
 
-        return new AuthenticationResponse
-        {
+        return new AuthenticationResponse {
             IsAuthenticated = true,
             UserId = entity.Id.ToString(),
             UserName = entity.Username,
@@ -52,20 +43,18 @@ public class AuthService(
         };
     }
 
-    public async Task<int> GetTokensAsync(Guid playerId, CancellationToken ct = default)
-    {
+    public async Task<int> GetTokensAsync(Guid playerId, CancellationToken ct = default) {
         UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
         return player?.Tokens ?? 0;
     }
 
-    public async Task<AuthenticationResponse> RegisterPlayerAsync(RegisterRequest request, CancellationToken ct = default)
-    {
+    public async Task<AuthenticationResponse> RegisterPlayerAsync(RegisterRequest request, CancellationToken ct = default) {
         UsrPlayer existing = await _dataLayerService.GetPlayerByNameAsync(request.Name, ct);
-        if (existing is not null)
+        if (existing is not null) {
             return new AuthenticationResponse { IsAuthenticated = false };
+        }
 
-        UsrPlayer player = new()
-        {
+        UsrPlayer player = new() {
             Id = Guid.NewGuid(),
             Name = request.Name,
             Email = request.Email,
@@ -76,8 +65,7 @@ public class AuthService(
 
         await _dataLayerService.AddPlayerAsync(player, ct);
 
-        return new AuthenticationResponse
-        {
+        return new AuthenticationResponse {
             IsAuthenticated = true,
             UserId = player.Id.ToString(),
             UserName = player.Name,

@@ -5,9 +5,7 @@ using SystemFramework.Security;
 
 namespace DataAccessService;
 
-public class MinesDataService(App_DBContext context, ActiveTenantService activeTenantService)
-    : BaseDataService(context, activeTenantService), IMinesDataService
-{
+public class MinesDataService(App_DBContext context, ActiveTenantService activeTenantService) : BaseDataService(context, activeTenantService), IMinesDataService {
     public async Task<UsrPlayer> GetPlayerByIdAsync(Guid id, CancellationToken ct = default)
         => await _context.UsrPlayers.FirstOrDefaultAsync(p => p.Id == id, ct);
 

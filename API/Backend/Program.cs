@@ -30,7 +30,8 @@ public class Program {
         });
 
         ISignalRServerBuilder signalR = builder.Services.AddSignalR();
-        if (useRedis) signalR.AddStackExchangeRedis(redisConnection);
+        if (useRedis)
+            signalR.AddStackExchangeRedis(redisConnection);
 
         if (useRedis)
             builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConnection);
@@ -49,39 +50,39 @@ public class Program {
 
         builder.Services.AddActiveTenantService();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IErrorService, BusinessLogicService.ErrorService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IErrorService, ErrorService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IErrorService, DataAccessService.ErrorService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IAuthService, BusinessLogicService.AuthService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IAuthService, AuthService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IAuthService, DataAccessService.AuthService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IAdminService, BusinessLogicService.AdminService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IAdminService, AdminService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IAdminDataService, DataAccessService.AdminDataService>();
-        builder.Services.AddSingleton<BusinessLogicServiceInterface.IAdminBroadcastService, WebSocketServicePoint.AdminBroadcastService>();
+        builder.Services.AddSingleton<BusinessLogicServiceInterface.IAdminBroadcastService, AdminBroadcastService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.ISlotService, BusinessLogicService.SlotService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.ISlotService, SlotService>();
         builder.Services.AddScoped<DataAccessServiceInterface.ISlotDataService, DataAccessService.SlotDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IBlackjackService, BusinessLogicService.BlackjackService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IBlackjackService, BlackjackService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IBlackjackDataService, DataAccessService.BlackjackDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IRouletteService, BusinessLogicService.RouletteService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IRouletteService, RouletteService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IRouletteDataService, DataAccessService.RouletteDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IHorseService, BusinessLogicService.HorseService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IHorseService, HorseService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IHorseDataService, DataAccessService.HorseDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IBaccaratService, BusinessLogicService.BaccaratService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IBaccaratService, BaccaratService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IBaccaratDataService, DataAccessService.BaccaratDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IMinesService, BusinessLogicService.MinesService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IMinesService, MinesService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IMinesDataService, DataAccessService.MinesDataService>();
 
-        builder.Services.AddTransient<BusinessLogicServiceInterface.IPlinkoService, BusinessLogicService.PlinkoService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.IPlinkoService, PlinkoService>();
         builder.Services.AddScoped<DataAccessServiceInterface.IPlinkoDataService, DataAccessService.PlinkoDataService>();
 
         builder.Services.AddSingleton<BusinessLogicServiceInterface.ICrashGameStore, BusinessLogicService.GameState.CrashGameStore>();
-        builder.Services.AddTransient<BusinessLogicServiceInterface.ICrashService, BusinessLogicService.CrashService>();
+        builder.Services.AddTransient<BusinessLogicServiceInterface.ICrashService, CrashService>();
         builder.Services.AddScoped<DataAccessServiceInterface.ICrashDataService, DataAccessService.CrashDataService>();
         builder.Services.AddHostedService<WebSocketServicePoint.CrashGameWorker>();
 
@@ -104,7 +105,7 @@ public class Program {
             options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
 
-        builder.Services.AddSingleton<SystemFramework.SignalR.IOnlineTracker, SystemFramework.SignalR.OnlineTracker>();
+        builder.Services.AddSingleton<IOnlineTracker, OnlineTracker>();
         builder.Services.AddSingleton<IUserIdProvider, IdBasedNameIdentifier>();
 
         WebApplication app = builder.Build();
@@ -122,7 +123,7 @@ public class Program {
         app.UseAuthorization();
         app.MapHub<SystemHub>("/hub");
         app.MapHub<GameHub>("/game");
-        app.MapHub<WebSocketServicePoint.AdminHub>("/adminhub");
+        app.MapHub<AdminHub>("/adminhub");
         app.MapControllers();
         app.Run();
     }

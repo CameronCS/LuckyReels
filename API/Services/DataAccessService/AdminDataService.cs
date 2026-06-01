@@ -5,32 +5,27 @@ using SystemFramework.Security;
 
 namespace DataAccessService;
 
-public class AdminDataService(App_DBContext context, ActiveTenantService activeTenantService)
-    : BaseDataService(context, activeTenantService), IAdminDataService
-{
-    public async Task<List<UsrPlayer>> GetPlayersPagedAsync(int skip, int take, string? search, IReadOnlySet<Guid> onlineIds, CancellationToken ct = default)
-    {
+public class AdminDataService(App_DBContext context, ActiveTenantService activeTenantService) : BaseDataService(context, activeTenantService), IAdminDataService {
+    public async Task<List<UsrPlayer>> GetPlayersPagedAsync(int skip, int take, string? search, IReadOnlySet<Guid> onlineIds, CancellationToken ct = default) {
         IQueryable<UsrPlayer> q = _context.UsrPlayers;
-        if (!string.IsNullOrWhiteSpace(search))
+        if (!string.IsNullOrWhiteSpace(search)) {
             q = q.Where(p => p.Name.Contains(search));
-        if (onlineIds.Count > 0)
-        {
+        }
+        if (onlineIds.Count > 0) {
             // Materialise to List<Guid> so EF Core translates Contains → SQL IN (...)
             List<Guid> ids = onlineIds.ToList();
             q = q.OrderByDescending(p => ids.Contains(p.Id)).ThenBy(p => p.Name);
-        }
-        else
-        {
+        } else {
             q = q.OrderBy(p => p.Name);
         }
         return await q.Skip(skip).Take(take).ToListAsync(ct);
     }
 
-    public async Task<int> GetPlayerCountAsync(string? search, CancellationToken ct = default)
-    {
+    public async Task<int> GetPlayerCountAsync(string? search, CancellationToken ct = default) {
         IQueryable<UsrPlayer> q = _context.UsrPlayers;
-        if (!string.IsNullOrWhiteSpace(search))
+        if (!string.IsNullOrWhiteSpace(search)) {
             q = q.Where(p => p.Name.Contains(search));
+        }
         return await q.CountAsync(ct);
     }
 
