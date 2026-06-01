@@ -10,22 +10,16 @@ using IDataLayerService = DataAccessServiceInterface.ICrashDataService;
 
 namespace BusinessLogicService;
 
-public class CrashService(
-    IDataLayerService dataLayerService,
-    ActiveTenantService activeTenantService,
-    IHubContext<SystemHub> systemHub,
-    IMapper mapper,
-    ICrashGameStore store,
-    IAdminBroadcastService adminBroadcast)
-    : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), ICrashService
-{
-    public async Task PlaceBetAsync(Guid playerId, int bet, CancellationToken ct = default)
-    {
+public class CrashService(IDataLayerService dataLayerService, ActiveTenantService activeTenantService, IHubContext<SystemHub> systemHub, IMapper mapper, ICrashGameStore store, IAdminBroadcastService adminBroadcast) : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), ICrashService {
+    public async Task PlaceBetAsync(Guid playerId, int bet, CancellationToken ct = default) {
         UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
-        if (player == null || player.Tokens < bet) throw new InvalidOperationException("Insufficient tokens.");
+        if (player == null || player.Tokens < bet) {
+            throw new InvalidOperationException("Insufficient tokens.");
+        }
 
-        if (!store.TryPlaceBet(playerId, bet))
+        if (!store.TryPlaceBet(playerId, bet)) {
             throw new InvalidOperationException("Betting is closed for this round.");
+        }
 
         int newBalance = player.Tokens - bet;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
@@ -34,38 +28,36 @@ public class CrashService(
         await adminBroadcast.GameEvent(playerId, "crash", new { phase = "bet", bet });
     }
 
-    public async Task<CrashResult> CashoutAsync(Guid playerId, CancellationToken ct = default)
-    {
-        if (!store.TryCashout(playerId))
+    public async Task<CrashResult> CashoutAsync(Guid playerId, CancellationToken ct = default) {
+        if (!store.TryCashout(playerId)) {
             throw new InvalidOperationException("Cannot cashout at this time.");
+        }
 
         store.TryGetBet(playerId, out int bet);
 
         double cashedOutAt = store.CurrentMultiplier;
-        int winnings       = (int)(bet * cashedOutAt);
-        int net            = winnings - bet;
+        int winnings = (int)(bet * cashedOutAt);
+        int net = winnings - bet;
 
         UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
-        int newBalance    = player.Tokens + winnings;
+        int newBalance = player.Tokens + winnings;
         await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
 
         await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
-        await adminBroadcast.GameEvent(playerId, "crash", new
-        {
-            phase      = "cashout",
+        await adminBroadcast.GameEvent(playerId, "crash", new {
+            phase = "cashout",
             bet,
             net,
             cashedOutAt,
             crashPoint = store.CrashPoint
         });
 
-        return new CrashResult
-        {
-            CrashedAt   = store.CrashPoint,
+        return new CrashResult {
+            CrashedAt = store.CrashPoint,
             CashedOutAt = cashedOutAt,
-            Bet         = bet,
-            Net         = net,
-            NewBalance  = newBalance
+            Bet = bet,
+            Net = net,
+            NewBalance = newBalance
         };
     }
 }

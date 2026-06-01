@@ -26,14 +26,21 @@ export default function Mines() {
     useEffect(() => { if (!isAuthed) navigate('/') }, [isAuthed])
 
     useEffect(() => {
-        if (!conn) return
+        if (!conn) {
+            return
+        }
         conn.on('MinesState', onState)
         conn.on('MinesResult', onResult)
-        return () => { conn.off('MinesState', onState); conn.off('MinesResult', onResult) }
+        return () => {
+            conn.off('MinesState', onState);
+            conn.off('MinesResult', onResult)
+        }
     }, [conn])
 
     function onState(s) {
-        if (s.isGameOver) return  // handled as MinesResult
+        if (s.isGameOver) { // handled as MinesResult
+            return
+        }
         setTokens(s.balance)
         if (s.revealed.length === 0 && s.bet > 0) {
             // fresh start
@@ -64,7 +71,9 @@ export default function Mines() {
             setGrid(g => {
                 const ng = [...g]
                 msg.grid.forEach((isMine, i) => { if (isMine) ng[i] = 'mine' })
-                if (clickedIdx !== null) ng[clickedIdx] = 'mine-clicked'
+                if (clickedIdx !== null) {
+                    ng[clickedIdx] = 'mine-clicked'
+                }
                 return ng
             })
             setTokens(msg.balance)
@@ -87,7 +96,9 @@ export default function Mines() {
     }
 
     function startGame() {
-        if (phase !== 'idle' || tokens < bet) return
+        if (phase !== 'idle' || tokens < bet) {
+            return
+        }
         setPhase('playing')
         setRevealed(new Set())
         setGrid(new Array(25).fill(null))
@@ -96,26 +107,42 @@ export default function Mines() {
     }
 
     function revealCell(idx) {
-        if (phase !== 'playing') return
-        if (revealed.has(idx) || grid[idx] !== null) return
+        if (phase !== 'playing') {
+            return
+        }
+        if (revealed.has(idx) || grid[idx] !== null) {
+            return
+        }
         lastClickedRef.current = idx
         conn.invoke('MinesReveal', idx)
     }
 
     function cashOut() {
-        if (phase !== 'playing' || revealed.size === 0) return
+        if (phase !== 'playing' || revealed.size === 0) {
+            return
+        }
         conn.invoke('MinesCashout')
     }
 
     function cellContent(g) {
-        if (g === 'gem') return '💎'
-        if (g === 'mine' || g === 'mine-clicked') return '💣'
+        if (g === 'gem') {
+            return '💎'
+        }
+        if (g === 'mine' || g === 'mine-clicked') {
+            return '💣'
+        }
         return ''
     }
     function cellCls(g, isRevealed) {
-        if (g === 'mine-clicked') return 'mine-cell mine clicked'
-        if (g === 'mine') return 'mine-cell mine'
-        if (g === 'gem' || isRevealed) return 'mine-cell safe'
+        if (g === 'mine-clicked') {
+            return 'mine-cell mine clicked'
+        }
+        if (g === 'mine') {
+            return 'mine-cell mine'
+        }
+        if (g === 'gem' || isRevealed) {
+            return 'mine-cell safe'
+        }
         return 'mine-cell'
     }
 

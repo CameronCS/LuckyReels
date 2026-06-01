@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using SystemFramework.Security;
 using Models;
 
-namespace APIGateWay; 
-public class ErrorGateway(ActiveTenantService activeTenantService, IErrorService errorService): BaseController(activeTenantService) {
+namespace APIGateWay;
+
+public class ErrorGateway(ActiveTenantService activeTenantService, IErrorService errorService) : BaseController(activeTenantService) {
     [HttpPost]
     public async Task AddError(Error error) {
         await errorService.AddError(error);

@@ -6,7 +6,8 @@ public class GatewayControllerConvention : IControllerModelConvention
 {
     public void Apply(ControllerModel controller)
     {
-        if (controller.ControllerName.EndsWith("Gateway"))
+        if (controller.ControllerName.EndsWith("Gateway")) {
             controller.ControllerName = controller.ControllerName[..^"Gateway".Length];
+        }
     }
 }

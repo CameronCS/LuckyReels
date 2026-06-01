@@ -5,9 +5,7 @@ using SystemFramework.Security;
 
 namespace DataAccessService;
 
-public class BaccaratDataService(App_DBContext context, ActiveTenantService activeTenantService)
-    : BaseDataService(context, activeTenantService), IBaccaratDataService
-{
+public class BaccaratDataService(App_DBContext context, ActiveTenantService activeTenantService) : BaseDataService(context, activeTenantService), IBaccaratDataService {
     public async Task<UsrPlayer> GetPlayerByIdAsync(Guid id, CancellationToken ct = default)
         => await _context.UsrPlayers.FirstOrDefaultAsync(p => p.Id == id, ct);
 
@@ -16,8 +14,7 @@ public class BaccaratDataService(App_DBContext context, ActiveTenantService acti
             .Where(p => p.Id == id)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Tokens, tokens), ct);
 
-    public async Task AddBaccaratLogAsync(LogBaccarat log, CancellationToken ct = default)
-    {
+    public async Task AddBaccaratLogAsync(LogBaccarat log, CancellationToken ct = default) {
         await _context.LogBaccarats.AddAsync(log, ct);
         await _context.SaveChangesAsync(ct);
     }
