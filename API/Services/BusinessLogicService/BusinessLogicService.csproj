@@ -6,4 +6,20 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.1.1" />
+		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\CommonObjects\CommonObjects.csproj" />
+	  <ProjectReference Include="..\..\Common\Models\Models.csproj" />
+	  <ProjectReference Include="..\..\Common\SystemFramework\SystemFramework.csproj" />
+	  <ProjectReference Include="..\..\Database\DatabaseEntities\DatabaseEntities.csproj" />
+	  <ProjectReference Include="..\..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
+	  <ProjectReference Include="..\..\ServiceInterfaces\DataAccessServiceInterface\DataAccessServiceInterface.csproj" />
+	  <ProjectReference Include="..\GameEngines\GameEngines.csproj" />
+	</ItemGroup>
+
 </Project>

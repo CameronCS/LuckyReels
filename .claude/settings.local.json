@@ -17,7 +17,24 @@
       "PowerShell(Get-Process *)",
       "PowerShell(ng version *)",
       "PowerShell(npm *)",
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)"
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "Bash(dir \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\" /s /b)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\\\\Common\\\\CommonObjects\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "Bash(dotnet build *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(npx ng *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Filter \"*.cs\" -Recurse -Exclude \"*/node_modules/*\")",
+      "PowerShell(dotnet build \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\\\\Services\\\\BusinessLogicService\" --nologo -v q 2>&1 | Where-Object { $_ -match \"error CS\" })",
+      "PowerShell(dotnet build \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\\\\API\\\\Services\\\\WebSocketServicePoint\" --nologo -v q 2>&1 | Where-Object { $_ -match \"error CS\" })",
+      "PowerShell(dotnet build *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Directory)",
+      "Bash(Select-Object Name)",
+      "PowerShell(head *)",
+      "Bash(dotnet run *)"
     ]
   }
 }

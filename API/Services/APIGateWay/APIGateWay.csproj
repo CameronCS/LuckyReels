@@ -3,7 +3,20 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Asp.Versioning.Http" Version="8.1.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\CommonObjects\CommonObjects.csproj" />
+	  <ProjectReference Include="..\..\Common\Models\Models.csproj" />
+	  <ProjectReference Include="..\..\Common\SystemFramework\SystemFramework.csproj" />
+	  <ProjectReference Include="..\..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
+	</ItemGroup>
 
 </Project>

@@ -1,13 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-  </ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="16.1.1" />
+		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Common\SystemFramework\SystemFramework.csproj" />
+		<ProjectReference Include="..\Database\DatabaseEntities\DatabaseEntities.csproj" />
+		<ProjectReference Include="..\Database\MigrationHandler\MigrationHandler.csproj" />
+		<ProjectReference Include="..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
+		<ProjectReference Include="..\ServiceInterfaces\DataAccessServiceInterface\DataAccessServiceInterface.csproj" />
+		<ProjectReference Include="..\Services\APIGateWay\APIGateWay.csproj" />
+		<ProjectReference Include="..\Services\BusinessLogicService\BusinessLogicService.csproj" />
+		<ProjectReference Include="..\Services\DataAccessService\DataAccessService.csproj" />
+		<ProjectReference Include="..\Services\WebSocketServicePoint\WebSocketServicePoint.csproj" />
+	</ItemGroup>
 </Project>

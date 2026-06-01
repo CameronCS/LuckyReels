@@ -1,9 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\CommonObjects\CommonObjects.csproj" />
+    <ProjectReference Include="..\..\Common\SystemFramework\SystemFramework.csproj" />
+    <ProjectReference Include="..\..\ServiceInterfaces\BusinessLogicServiceInterface\BusinessLogicServiceInterface.csproj" />
+  </ItemGroup>
 
 </Project>
