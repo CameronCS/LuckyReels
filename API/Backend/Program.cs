@@ -16,7 +16,7 @@ public class Program {
     public static void Main(string[] args) {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        string redisConnection = builder.Configuration.GetConnectionString("Redis");
+        string redisConnection = builder.Configuration.GetValue<string>("Redis") ?? string.Empty;
         bool useRedis = !string.IsNullOrEmpty(redisConnection);
 
         builder.Services.AddControllers(options => options.Conventions.Add(new APIGateWay.GatewayControllerConvention()));
