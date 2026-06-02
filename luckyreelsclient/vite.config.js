@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
-const BACKEND = 'https://localhost:7211'
+const BACKEND = 'http://localhost:7011'
 
 export default defineConfig({
     plugins: [plugin()],
