@@ -186,6 +186,63 @@ public class BlackjackService(IDataLayerService dataLayerService, ActiveTenantSe
         };
     }
 
+    public async Task<BlackjackResult> DoubleAsync(Guid playerId, CancellationToken ct = default) {
+        BlackjackGameState state = await GetStateAsync(playerId);
+
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        if (player.Tokens < state.Bet)
+            throw new InvalidOperationException("Insufficient tokens to double down.");
+
+        int balanceAfterDouble = player.Tokens - state.Bet;
+        await _dataLayerService.UpdatePlayerTokensAsync(playerId, balanceAfterDouble, ct);
+
+        state.PlayerHand.Add(BlackjackEngine.Draw(state.Deck));
+        int playerTotal = BlackjackEngine.HandValue(state.PlayerHand);
+        int effectiveBet = state.Bet * 2;
+
+        string result;
+        if (playerTotal > 21) {
+            result = "bust";
+        } else {
+            BlackjackEngine.DealerPlay(state.DealerHand, state.Deck);
+            result = BlackjackEngine.Resolve(state.PlayerHand, state.DealerHand);
+        }
+
+        int payout = BlackjackEngine.Payout(result, effectiveBet);
+        int net = BlackjackEngine.Net(result, effectiveBet);
+        int newBalance = balanceAfterDouble + payout;
+
+        await _dataLayerService.UpdatePlayerTokensAsync(playerId, newBalance, ct);
+
+        await _dataLayerService.AddBlackjackLogAsync(new LogBlackjack {
+            PlayerId = playerId,
+            Result = result,
+            PlayerCards = JsonSerializer.Serialize(state.PlayerHand),
+            DealerCards = JsonSerializer.Serialize(state.DealerHand),
+            Bet = effectiveBet,
+            Net = net,
+            CreatedAt = DateTime.UtcNow
+        }, ct);
+
+        await ClearStateAsync(playerId);
+
+        await adminBroadcast.TokenUpdate(playerId, player.Name, newBalance);
+        await adminBroadcast.GameEvent(playerId, "blackjack", new {
+            phase = "result", result, bet = effectiveBet, net
+        });
+
+        return new BlackjackResult {
+            PlayerHand = [.. state.PlayerHand],
+            DealerHand = [.. state.DealerHand],
+            PlayerTotal = playerTotal,
+            DealerTotal = BlackjackEngine.HandValue(state.DealerHand),
+            Result = result,
+            Net = net,
+            Bet = effectiveBet,
+            NewBalance = newBalance
+        };
+    }
+
     private static BlackjackState BuildState(BlackjackGameState state, int balance)
         => new() {
             PlayerHand = [.. state.PlayerHand],
