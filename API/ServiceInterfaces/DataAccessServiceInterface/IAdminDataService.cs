@@ -8,4 +8,5 @@ public interface IAdminDataService : IBaseDataLayerService
     Task<int> GetPlayerCountAsync(string? search, CancellationToken ct = default);
     Task<UsrPlayer?> GetPlayerByIdAsync(Guid id, CancellationToken ct = default);
     Task SetPlayerTokensAsync(Guid playerId, int tokens, CancellationToken ct = default);
+    Task SetPlayerPermissionAsync(Guid playerId, string permission, CancellationToken ct = default);
 }

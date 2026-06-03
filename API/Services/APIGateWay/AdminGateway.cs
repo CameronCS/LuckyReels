@@ -7,6 +7,7 @@ using SystemFramework.Security;
 namespace APIGateWay;
 
 public record SetTokensRequest(Guid PlayerId, int Tokens);
+public record SetPermissionRequest(Guid PlayerId, string Permission);
 public record BroadcastRequest(string Type, string Message);
 
 [Authorize(Roles = "Admin")]
@@ -27,6 +28,15 @@ public class AdminGateway(ActiveTenantService activeTenantService, IAdminService
             return BadRequest("Tokens cannot be negative.");
         }
         await adminService.SetTokensAsync(request.PlayerId, request.Tokens, ct);
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SetPermission([FromBody] SetPermissionRequest request, CancellationToken ct = default) {
+        if (request.Permission is not ("Player" or "VIP" or "Moderated" or "Suspended")) {
+            return BadRequest("Invalid permission.");
+        }
+        await adminService.SetPermissionAsync(request.PlayerId, request.Permission, ct);
         return Ok();
     }
 

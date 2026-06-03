@@ -4,6 +4,7 @@ using CommonObjects.Authentication;
 using DatabaseEntities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using Models;
 using SystemFramework.JWTAuthentication;
 using SystemFramework.Security;
 using SystemFramework.SignalR;
@@ -25,6 +26,8 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
             IsAuthenticated = true,
             UserId = entity.Id.ToString(),
             UserName = entity.Name,
+            ProfileAvatar = entity.ProfileAvatar,
+            Permission = entity.Permission,
             Token = JWTTokenGenerator.Generate(entity.Id.ToString(), entity.Name, "Player", JwtKey)
         };
     }
@@ -39,6 +42,7 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
             IsAuthenticated = true,
             UserId = entity.Id.ToString(),
             UserName = entity.Username,
+            Permission = "Admin",
             Token = JWTTokenGenerator.Generate(entity.Id.ToString(), entity.Username, "Admin", JwtKey)
         };
     }
@@ -60,6 +64,7 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             Tokens = 10_000,
+            Permission = "Player",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -69,7 +74,36 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
             IsAuthenticated = true,
             UserId = player.Id.ToString(),
             UserName = player.Name,
+            ProfileAvatar = player.ProfileAvatar,
+            Permission = player.Permission,
             Token = JWTTokenGenerator.Generate(player.Id.ToString(), player.Name, "Player", JwtKey)
         };
     }
+
+    public async Task<Player?> GetPlayerProfileAsync(Guid playerId, CancellationToken ct = default) {
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        return player is null ? null : ToProfile(player);
+    }
+
+    public async Task<Player?> UpdatePlayerAvatarAsync(Guid playerId, string? avatar, CancellationToken ct = default) {
+        if (!string.IsNullOrWhiteSpace(avatar) && avatar.Length > 400_000) {
+            throw new InvalidOperationException("Profile image is too large.");
+        }
+
+        await _dataLayerService.UpdatePlayerAvatarAsync(playerId, string.IsNullOrWhiteSpace(avatar) ? null : avatar, ct);
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        return player is null ? null : ToProfile(player);
+    }
+
+    private static Player ToProfile(UsrPlayer player)
+        => new() {
+            ID = player.Id,
+            Name = player.Name,
+            Email = player.Email,
+            Tokens = player.Tokens,
+            ProfileAvatar = player.ProfileAvatar,
+            Permission = player.Permission,
+            LastBonusAt = player.LastBonusAt,
+            CreatedAt = player.CreatedAt
+        };
 }

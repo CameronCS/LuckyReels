@@ -15,7 +15,7 @@ const GAMES = [
 ]
 
 export default function Home() {
-    const { isAuthed, tokens, playerName, connect, disconnect } = useHub()
+    const { isAuthed, tokens, playerName, profileAvatar, connect, disconnect } = useHub()
     const [mode, setMode] = useState('register')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -62,7 +62,7 @@ export default function Home() {
                     setError('Username already taken.'); return
                 }
                 const data = await res.json()
-                await connect(data.token, data.userName)
+                await connect(data.token, data.userName, data.profileAvatar ?? null, data.permission ?? '')
             } else {
                 const res = await fetch(`${API}/api/v1/Auth/LoginPlayer`, {
                     method: 'POST',
@@ -73,7 +73,7 @@ export default function Home() {
                     setError('Invalid username or password.'); return
                 }
                 const data = await res.json()
-                await connect(data.token, data.userName)
+                await connect(data.token, data.userName, data.profileAvatar ?? null, data.permission ?? '')
             }
         } catch {
             setError('Connection failed — is the server running?')
@@ -128,10 +128,13 @@ export default function Home() {
                             <div className="hub-sub">Choose your game</div>
                         </div>
                         <div className="hub-player">
-                            <div className="hub-name-pill">
+                            <Link className="hub-name-pill hub-profile-link" to="/profile">
+                                <span className="mini-avatar" style={profileAvatar?.startsWith('data:') ? { backgroundImage: `url(${profileAvatar})` } : { background: profileAvatar ?? 'linear-gradient(135deg,#FFD700,#0AF5F5)' }}>
+                                    {!profileAvatar?.startsWith('data:') && playerName.slice(0, 1).toUpperCase()}
+                                </span>
                                 <div className="hub-online-dot" />
                                 <span>{playerName}</span>
-                            </div>
+                            </Link>
                             <div className="hub-tokens">
                                 <div className="hub-tokens-label">🪙 Tokens</div>
                                 <div className="hub-tokens-value">{tokens.toLocaleString()}</div>

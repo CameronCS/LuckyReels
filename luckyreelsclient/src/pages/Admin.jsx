@@ -261,6 +261,25 @@ export default function Admin() {
         }
     }
 
+    async function applyPermission(player, permission) {
+        const tok = tokenRef.current
+        try {
+            const res = await fetch('/api/v1/Admin/SetPermission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+                body: JSON.stringify({ PlayerId: player.id, Permission: permission }),
+            })
+            if (!res.ok) {
+                showToast('Permission update failed.')
+                return
+            }
+            setPlayers(ps => ps.map(p => p.id === player.id ? { ...p, permission } : p))
+            showToast(`Permission set to ${permission}.`)
+        } catch {
+            showToast('Permission update failed.')
+        }
+    }
+
     function adjust(player, delta) {
         applyTokens(player, Math.max(0, player.tokens + delta),
             `${delta > 0 ? '+' : ''}${delta} → ${player.name}`)
@@ -462,6 +481,40 @@ export default function Admin() {
                                     <tr key={`${p.id}-detail`} className="admin-detail-row">
                                         <td colSpan={5} className="admin-detail-cell">
                                             <div className="admin-detail">
+                                                <div className="admin-profile-card">
+                                                    <div className="admin-profile-avatar" style={p.profileAvatar?.startsWith('data:') ? { backgroundImage: `url(${p.profileAvatar})` } : p.profileAvatar ? { background: p.profileAvatar } : undefined}>
+                                                        {!p.profileAvatar?.startsWith('data:') && p.name?.slice(0, 1).toUpperCase()}
+                                                    </div>
+                                                    <div className="admin-profile-main">
+                                                        <div className="admin-profile-kicker">Player profile</div>
+                                                        <div className="admin-profile-name">{p.name}</div>
+                                                        <div className="admin-profile-email">{p.email}</div>
+                                                    </div>
+                                                    <div className="admin-profile-stats">
+                                                        <div className="admin-profile-stat">
+                                                            <span>Status</span>
+                                                            <strong className={isOnline ? 'is-online' : ''}>{isOnline ? 'Online' : 'Offline'}</strong>
+                                                        </div>
+                                                        <div className="admin-profile-stat">
+                                                            <span>Tokens</span>
+                                                            <strong>{p.tokens.toLocaleString()}</strong>
+                                                        </div>
+                                                        <div className="admin-profile-stat">
+                                                            <span>Joined</span>
+                                                            <strong>{new Date(p.createdAt).toLocaleDateString()}</strong>
+                                                        </div>
+                                                    </div>
+                                                    <label className="admin-permission-field">
+                                                        <span>Permissions</span>
+                                                        <select value={p.permission ?? 'Player'} onChange={e => applyPermission(p, e.target.value)}>
+                                                            <option value="Player">Player</option>
+                                                            <option value="VIP">VIP</option>
+                                                            <option value="Moderated">Moderated</option>
+                                                            <option value="Suspended">Suspended</option>
+                                                        </select>
+                                                    </label>
+                                                </div>
+                                                <div className="admin-activity-panel">
                                                 <div className="admin-detail-header">
                                                     <span className="admin-detail-title">🔴 LIVE · {p.name}</span>
                                                     <span className="admin-detail-count">{playerEvents.length} events</span>
@@ -486,6 +539,7 @@ export default function Admin() {
                                                         })}
                                                     </div>
                                                 )}
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>

@@ -298,6 +298,16 @@ body {
     gap: 8px;
 }
 
+.hub-profile-link {
+    text-decoration: none;
+    transition: border-color .15s, color .15s, transform .15s;
+}
+
+    .hub-profile-link:hover {
+        border-color: var(--gold);
+        transform: translateY(-1px);
+    }
+
 .hub-online-dot {
     width: 6px;
     height: 6px;
@@ -688,6 +698,34 @@ body {
     font-size: 11px;
     letter-spacing: 1px;
     white-space: nowrap;
+}
+
+.profile-link-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+}
+
+    .profile-link-pill:hover {
+        border-color: currentColor;
+    }
+
+.mini-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    color: #050509;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 16px;
+    letter-spacing: 0;
+    flex-shrink: 0;
 }
 
 .tokens-box {
@@ -2507,6 +2545,209 @@ body {
 }
 
 /* ── Admin Panel ─────────────────────────────────────────────────── */
+/* Profile */
+.profile-page {
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+    padding: 32px 16px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.profile-shell {
+    width: min(860px,100%);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.profile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.profile-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+    .profile-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 14%;
+        right: 14%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--gold), var(--blue), transparent);
+    }
+
+.profile-avatar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.profile-avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,215,0,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+    color: #050509;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 92px;
+    letter-spacing: 0;
+    box-shadow: 0 0 40px rgba(255,215,0,.08);
+}
+
+.profile-file-input {
+    display: none;
+}
+
+.profile-upload-btn,
+.profile-primary-btn,
+.profile-secondary-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, color .15s, background .15s;
+}
+
+.profile-upload-btn,
+.profile-secondary-btn {
+    background: #0d0d14;
+    color: #777;
+    border: 1px solid var(--border);
+}
+
+    .profile-upload-btn:hover,
+    .profile-secondary-btn:hover {
+        color: var(--gold);
+        border-color: var(--gold);
+        transform: translateY(-1px);
+    }
+
+.profile-primary-btn {
+    background: linear-gradient(135deg,var(--gold2),var(--gold));
+    color: #050509;
+    border: none;
+    font-weight: 700;
+}
+
+    .profile-primary-btn:hover {
+        transform: translateY(-1px);
+    }
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+.profile-kicker,
+.profile-section-label {
+    font-size: 10px;
+    color: #555;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+.profile-details h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 58px;
+    line-height: 1;
+    letter-spacing: 6px;
+    color: var(--gold);
+    overflow-wrap: anywhere;
+}
+
+.profile-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 12px;
+}
+
+.profile-stat {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+    .profile-stat span {
+        display: block;
+        font-size: 9px;
+        color: #555;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .profile-stat strong {
+        font-family: 'Bebas Neue', cursive;
+        font-size: 34px;
+        color: var(--text);
+        letter-spacing: 2px;
+        line-height: 1;
+    }
+
+.avatar-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.avatar-preset {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform .15s, border-color .15s;
+}
+
+    .avatar-preset:hover,
+    .avatar-preset.active {
+        border-color: var(--gold);
+        transform: translateY(-1px);
+    }
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.profile-message {
+    color: var(--green);
+    font-size: 11px;
+    letter-spacing: 1px;
+    min-height: 16px;
+}
+
 .admin-login-wrap {
     min-height: 100vh;
     display: flex;
@@ -3011,6 +3252,131 @@ body {
     border-bottom: 1px solid #1a1a2a;
     background: #07070f;
     padding: 12px 20px;
+    display: grid;
+    grid-template-columns: 260px minmax(0,1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.admin-profile-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg,var(--gold),var(--blue));
+    background-size: cover;
+    background-position: center;
+    color: #050509;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    letter-spacing: 0;
+    border: 1px solid rgba(255,215,0,.35);
+}
+
+.admin-profile-main {
+    min-width: 0;
+}
+
+.admin-profile-kicker {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.admin-profile-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 30px;
+    color: var(--gold);
+    letter-spacing: 3px;
+    line-height: 1;
+    overflow-wrap: anywhere;
+}
+
+.admin-profile-email {
+    color: #555;
+    font-size: 10px;
+    letter-spacing: 1px;
+    overflow-wrap: anywhere;
+}
+
+.admin-profile-stats {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-profile-stat {
+    background: #0d0d14;
+    border: 1px solid #1a1a2a;
+    border-radius: 8px;
+    padding: 9px 10px;
+}
+
+    .admin-profile-stat span {
+        display: block;
+        font-size: 8px;
+        color: #555;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }
+
+    .admin-profile-stat strong {
+        color: var(--text);
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
+    .admin-profile-stat strong.is-online {
+        color: var(--green);
+    }
+
+.admin-permission-field {
+    display: grid;
+    gap: 6px;
+}
+
+    .admin-permission-field span {
+        font-size: 8px;
+        color: #555;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .admin-permission-field select {
+        width: 100%;
+        background: #0d0d14;
+        border: 1px solid var(--border);
+        color: var(--gold);
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        letter-spacing: 1px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        outline: none;
+        cursor: pointer;
+    }
+
+        .admin-permission-field select:focus {
+            border-color: var(--gold);
+        }
+
+.admin-activity-panel {
+    min-width: 0;
 }
 
 .admin-detail-header {
@@ -3290,6 +3656,49 @@ body {
 
     .hub-title {
         font-size: 36px;
+    }
+
+    .hub-player {
+        gap: 10px;
+    }
+
+    .hub-name-pill {
+        padding: 6px 10px;
+        letter-spacing: 1px;
+    }
+
+    .profile-panel {
+        grid-template-columns: 1fr;
+        padding: 24px 18px;
+    }
+
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        font-size: 72px;
+    }
+
+    .profile-details h1 {
+        font-size: 42px;
+    }
+
+    .profile-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-detail {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+
+    .admin-profile-card {
+        display: grid;
+        grid-template-columns: 64px minmax(0,1fr);
+        align-items: center;
+    }
+
+    .admin-profile-stats {
+        grid-column: 1 / -1;
     }
 
     .game-icon {

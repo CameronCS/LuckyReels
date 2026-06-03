@@ -36,4 +36,9 @@ public class AdminDataService(App_DBContext context, ActiveTenantService activeT
         => await _context.UsrPlayers
             .Where(p => p.Id == playerId)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.Tokens, tokens), ct);
+
+    public async Task SetPlayerPermissionAsync(Guid playerId, string permission, CancellationToken ct = default)
+        => await _context.UsrPlayers
+            .Where(p => p.Id == playerId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Permission, permission), ct);
 }

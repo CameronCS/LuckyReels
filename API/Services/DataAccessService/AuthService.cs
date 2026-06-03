@@ -19,4 +19,9 @@ public class AuthService(App_DBContext context, ActiveTenantService activeTenant
         await _context.UsrPlayers.AddAsync(player, ct);
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task UpdatePlayerAvatarAsync(Guid playerId, string? avatar, CancellationToken ct = default)
+        => await _context.UsrPlayers
+            .Where(p => p.Id == playerId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.ProfileAvatar, avatar), ct);
 }

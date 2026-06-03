@@ -389,6 +389,16 @@ namespace MigrationHandler.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<string>("Permission")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Player");
+
+                    b.Property<string>("ProfileAvatar")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Tokens")
                         .HasColumnType("int");
 

@@ -24,6 +24,8 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
             Name = p.Name,
             Email = p.Email,
             Tokens = p.Tokens,
+            ProfileAvatar = p.ProfileAvatar,
+            Permission = p.Permission,
             IsOnline = onlineIds.Contains(p.Id),
             CreatedAt = p.CreatedAt,
         })];
@@ -45,4 +47,15 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
         await adminBroadcast.TokenUpdate(playerId, player.Name, tokens);
         await adminBroadcast.NotifyPlayerTokensUpdated(playerId, tokens);
     }
+
+    public async Task SetPermissionAsync(Guid playerId, string permission, CancellationToken ct = default) {
+        if (!IsValidPermission(permission)) {
+            throw new InvalidOperationException("Invalid permission.");
+        }
+
+        await _dataLayerService.SetPlayerPermissionAsync(playerId, permission, ct);
+    }
+
+    private static bool IsValidPermission(string permission)
+        => permission is "Player" or "VIP" or "Moderated" or "Suspended";
 }
