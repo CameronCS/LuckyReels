@@ -78,6 +78,11 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
         await Clients.Caller.SendAsync(HubEvents.BlackjackResult, result);
     }
 
+    public async Task BlackjackDouble() {
+        BlackjackResult result = await Game<IBlackjackService>().DoubleAsync(PlayerId);
+        await Clients.Caller.SendAsync(HubEvents.BlackjackResult, result);
+    }
+
     // ── Roulette ──────────────────────────────────────────────────────────────
 
     public async Task SpinRoulette(List<RouletteBet> bets) {
