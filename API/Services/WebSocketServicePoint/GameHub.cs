@@ -19,7 +19,11 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
         return service;
     }
 
+    private async Task EnsurePlayerCanPlay()
+        => await Game<IAuthService>().EnsurePlayerCanPlayAsync(PlayerId);
+
     public override async Task OnConnectedAsync() {
+        await EnsurePlayerCanPlay();
         await Groups.AddToGroupAsync(Context.ConnectionId, "Online");
         onlineTracker.Add(PlayerId);
         await adminBroadcast.PlayerOnlineStatus(PlayerId, true);
@@ -39,11 +43,15 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Balance ──────────────────────────────────────────────────────────────
 
     public async Task<int> GetTokens()
-        => await Game<IAuthService>().GetTokensAsync(PlayerId);
+    {
+        await EnsurePlayerCanPlay();
+        return await Game<IAuthService>().GetTokensAsync(PlayerId);
+    }
 
     // ── Slots ─────────────────────────────────────────────────────────────────
 
     public async Task SpinSlots(int machineNum, int bet) {
+        await EnsurePlayerCanPlay();
         SlotResult result = await Game<ISlotService>().SpinAsync(PlayerId, machineNum, bet);
         await Clients.Caller.SendAsync(HubEvents.SlotResult, result);
     }
@@ -51,18 +59,21 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Blackjack ─────────────────────────────────────────────────────────────
 
     public async Task BlackjackDeal(int bet) {
+        await EnsurePlayerCanPlay();
         BlackjackState state = await Game<IBlackjackService>().DealAsync(PlayerId, bet);
         string evt = state.IsGameOver ? HubEvents.BlackjackResult : HubEvents.BlackjackState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
     public async Task BlackjackHit() {
+        await EnsurePlayerCanPlay();
         BlackjackState state = await Game<IBlackjackService>().HitAsync(PlayerId);
         string evt = state.IsGameOver ? HubEvents.BlackjackResult : HubEvents.BlackjackState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
     public async Task BlackjackStand() {
+        await EnsurePlayerCanPlay();
         BlackjackResult result = await Game<IBlackjackService>().StandAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.BlackjackResult, result);
     }
@@ -75,6 +86,7 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Roulette ──────────────────────────────────────────────────────────────
 
     public async Task SpinRoulette(List<RouletteBet> bets) {
+        await EnsurePlayerCanPlay();
         RouletteResult result = await Game<IRouletteService>().SpinAsync(PlayerId, bets);
         await Clients.Caller.SendAsync(HubEvents.RouletteResult, result);
     }
@@ -82,6 +94,7 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Horse Racing ──────────────────────────────────────────────────────────
 
     public async Task RaceHorse(string pickedHorse, int bet) {
+        await EnsurePlayerCanPlay();
         HorseResult result = await Game<IHorseService>().RaceAsync(PlayerId, pickedHorse, bet);
         await Clients.Caller.SendAsync(HubEvents.HorseResult, result);
     }
@@ -89,6 +102,7 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Baccarat ──────────────────────────────────────────────────────────────
 
     public async Task BaccaratBet(string betType, int bet) {
+        await EnsurePlayerCanPlay();
         BaccaratResult result = await Game<IBaccaratService>().BetAsync(PlayerId, betType, bet);
         await Clients.Caller.SendAsync(HubEvents.BaccaratResult, result);
     }
@@ -96,33 +110,42 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Mines ─────────────────────────────────────────────────────────────────
 
     public async Task MinesStart(int mineCount, int bet) {
+        await EnsurePlayerCanPlay();
         MinesState state = await Game<IMinesService>().StartAsync(PlayerId, mineCount, bet);
         await Clients.Caller.SendAsync(HubEvents.MinesState, state);
     }
 
     public async Task MinesReveal(int cellIndex) {
+        await EnsurePlayerCanPlay();
         MinesState state = await Game<IMinesService>().RevealAsync(PlayerId, cellIndex);
         string evt = state.IsGameOver ? HubEvents.MinesResult : HubEvents.MinesState;
         await Clients.Caller.SendAsync(evt, state);
     }
 
     public async Task MinesCashout() {
+        await EnsurePlayerCanPlay();
         MinesResult result = await Game<IMinesService>().CashoutAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.MinesResult, result);
     }
 
     // ── Crash ─────────────────────────────────────────────────────────────────
 
-    public async Task CrashJoin()
-        => await Groups.AddToGroupAsync(Context.ConnectionId, "Crash");
+    public async Task CrashJoin() {
+        await EnsurePlayerCanPlay();
+        await Groups.AddToGroupAsync(Context.ConnectionId, "Crash");
+    }
 
     public async Task CrashLeave()
         => await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Crash");
 
     public async Task CrashBet(int bet)
-        => await Game<ICrashService>().PlaceBetAsync(PlayerId, bet);
+    {
+        await EnsurePlayerCanPlay();
+        await Game<ICrashService>().PlaceBetAsync(PlayerId, bet);
+    }
 
     public async Task CrashCashout() {
+        await EnsurePlayerCanPlay();
         CrashResult result = await Game<ICrashService>().CashoutAsync(PlayerId);
         await Clients.Caller.SendAsync(HubEvents.CrashResult, result);
     }
@@ -130,6 +153,7 @@ public class GameHub(IServiceProvider services, IOnlineTracker onlineTracker, IA
     // ── Plinko ────────────────────────────────────────────────────────────────
 
     public async Task DropPlinko(int bet, string riskLevel) {
+        await EnsurePlayerCanPlay();
         PlinkoResult result = await Game<IPlinkoService>().DropAsync(PlayerId, bet, riskLevel);
         await Clients.Caller.SendAsync(HubEvents.PlinkoResult, result);
     }

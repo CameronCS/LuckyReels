@@ -10,6 +10,9 @@ export function HubProvider({ children }) {
     const [isAuthed, setIsAuthed] = useState(false)
     const [tokens, setTokens] = useState(0)
     const [playerName, setName] = useState('')
+    const [profileAvatar, setProfileAvatarState] = useState(null)
+    const [profileImageUrl, setProfileImageUrl] = useState(null)
+    const [permission, setPermission] = useState('')
     const [notifications, setNotifications] = useState([])
     const connecting = useRef(false)
     const notifConnRef = useRef(null)
@@ -33,6 +36,9 @@ export function HubProvider({ children }) {
     async function _doConnect(token, name) {
         if (connecting.current) return
         connecting.current = true
+        setProfileAvatarState(null)
+        setProfileImageUrl(null)
+        setPermission('')
 
         const c = new signalR.HubConnectionBuilder()
             .withUrl(`${API}/game`, { accessTokenFactory: () => token })
@@ -56,6 +62,18 @@ export function HubProvider({ children }) {
             setIsAuthed(true)
             notifConnRef.current = n
             n.start().catch(() => { })
+            fetch(`${API}/api/v1/Profile/Me`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.ok ? res.json() : null)
+                .then(profile => {
+                    if (!profile) return
+                    setProfileAvatarState(profile.profileAvatar ?? null)
+                    setProfileImageUrl(profile.profileImageUrl ?? null)
+                    setPermission(profile.permission ?? '')
+                    setTokens(profile.tokens ?? 0)
+                })
+                .catch(() => { })
         } catch {
             localStorage.removeItem('lr_token')
             localStorage.removeItem('lr_user')
@@ -64,10 +82,17 @@ export function HubProvider({ children }) {
         }
     }
 
-    async function connect(token, name) {
+    async function connect(token, name, avatar = null, imageUrl = null, userPermission = '') {
         localStorage.setItem('lr_token', token)
         localStorage.setItem('lr_user', name)
+        setProfileAvatarState(avatar)
+        setProfileImageUrl(imageUrl)
+        setPermission(userPermission)
         await _doConnect(token, name)
+    }
+
+    function setProfileAvatar(avatar) {
+        setProfileAvatarState(avatar)
     }
 
     async function disconnect() {
@@ -78,10 +103,13 @@ export function HubProvider({ children }) {
         setIsAuthed(false)
         setTokens(0)
         setName('')
+        setProfileAvatarState(null)
+        setProfileImageUrl(null)
+        setPermission('')
     }
 
     return (
-        <HubCtx.Provider value={{ conn, isAuthed, tokens, setTokens, playerName, connect, disconnect, notifications, dismissNotification }}>
+        <HubCtx.Provider value={{ conn, isAuthed, tokens, setTokens, playerName, profileAvatar, setProfileAvatar, profileImageUrl, setProfileImageUrl, permission, setPermission, connect, disconnect, notifications, dismissNotification }}>
             {children}
         </HubCtx.Provider>
     )

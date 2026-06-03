@@ -10,7 +10,7 @@ public class AdminHub : Hub {
         await base.OnConnectedAsync();
     }
 
-    public override async Task OnDisconnectedAsync(Exception? exception) {
+    public override async Task OnDisconnectedAsync(Exception exception) {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, "Admins");
         await base.OnDisconnectedAsync(exception);
     }

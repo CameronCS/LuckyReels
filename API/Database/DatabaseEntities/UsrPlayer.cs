@@ -17,6 +17,16 @@ public partial class UsrPlayer
 
     public int Tokens { get; set; }
 
+    public string? ProfileAvatar { get; set; }
+
+    public byte[]? ProfileImage { get; set; }
+
+    public string? ProfileImageContentType { get; set; }
+
+    public DateTime? ProfileImageUpdatedAt { get; set; }
+
+    public string Permission { get; set; } = "Player";
+
     public DateTime? LastBonusAt { get; set; }
 
     public DateTime CreatedAt { get; set; }

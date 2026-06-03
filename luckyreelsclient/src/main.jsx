@@ -12,6 +12,7 @@ import Mines from './pages/Mines'
 import Crash from './pages/Crash'
 import Plinko from './pages/Plinko'
 import Admin from './pages/Admin'
+import Profile from './pages/Profile'
 
 function NotificationToasts() {
     const { notifications, dismissNotification } = useHub()
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')).render(
                 <Route path="/mines" element={<Mines />} />
                 <Route path="/crash" element={<Crash />} />
                 <Route path="/plinko" element={<Plinko />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/admin" element={<Admin />} />
             </Routes>
         </BrowserRouter>

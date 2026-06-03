@@ -11,7 +11,7 @@ using IDataLayerService = DataAccessServiceInterface.IAdminDataService;
 namespace BusinessLogicService;
 
 public class AdminService(IDataLayerService dataLayerService, ActiveTenantService activeTenantService, IHubContext<SystemHub> systemHub, IMapper mapper, IAdminBroadcastService adminBroadcast, IOnlineTracker onlineTracker) : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IAdminService {
-    public async Task<(List<Player> Players, int Total)> GetPlayersAsync(int page, int pageSize, string? search, CancellationToken ct = default) {
+    public async Task<(List<Player> Players, int Total)> GetPlayersAsync(int page, int pageSize, string search, CancellationToken ct = default) {
         int skip = (page - 1) * pageSize;
 
         IReadOnlySet<Guid> onlineIds = onlineTracker.GetOnlineIds();
@@ -24,6 +24,11 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
             Name = p.Name,
             Email = p.Email,
             Tokens = p.Tokens,
+            ProfileAvatar = p.ProfileAvatar,
+            ProfileImageUrl = BuildProfileImageUrl(p),
+            ProfileImageContentType = p.ProfileImageContentType,
+            ProfileImageUpdatedAt = p.ProfileImageUpdatedAt,
+            Permission = p.Permission,
             IsOnline = onlineIds.Contains(p.Id),
             CreatedAt = p.CreatedAt,
         })];
@@ -35,7 +40,7 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
         => adminBroadcast.BroadcastNotificationAsync(type, message);
 
     public async Task SetTokensAsync(Guid playerId, int tokens, CancellationToken ct = default) {
-        UsrPlayer? player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
         if (player is null) {
             return;
         }
@@ -45,4 +50,20 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
         await adminBroadcast.TokenUpdate(playerId, player.Name, tokens);
         await adminBroadcast.NotifyPlayerTokensUpdated(playerId, tokens);
     }
+
+    public async Task SetPermissionAsync(Guid playerId, string permission, CancellationToken ct = default) {
+        if (!IsValidPermission(permission)) {
+            throw new InvalidOperationException("Invalid permission.");
+        }
+
+        await _dataLayerService.SetPlayerPermissionAsync(playerId, permission, ct);
+    }
+
+    private static bool IsValidPermission(string permission)
+        => permission is "Player" or "VIP" or "Moderated" or "Suspended";
+
+    private static string BuildProfileImageUrl(UsrPlayer player)
+        => player.ProfileImageContentType is null
+            ? null
+            : $"/api/v1/Profile/AvatarImage?playerId={player.Id}&v={(player.ProfileImageUpdatedAt ?? player.CreatedAt).Ticks}";
 }

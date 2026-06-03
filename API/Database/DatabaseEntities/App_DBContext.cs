@@ -198,6 +198,9 @@ public partial class App_DBContext : DbContext
             entity.Property(e => e.Email).HasMaxLength(254);
             entity.Property(e => e.Name).HasMaxLength(20);
             entity.Property(e => e.PasswordHash).HasMaxLength(60);
+            entity.Property(e => e.Permission).HasMaxLength(20).HasDefaultValue("Player");
+            entity.Property(e => e.ProfileImage).HasColumnType("varbinary(max)");
+            entity.Property(e => e.ProfileImageContentType).HasMaxLength(80);
         });
 
         modelBuilder.Entity<UsrSession>(entity =>
