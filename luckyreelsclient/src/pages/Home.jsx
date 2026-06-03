@@ -15,7 +15,7 @@ const GAMES = [
 ]
 
 export default function Home() {
-    const { isAuthed, tokens, playerName, profileAvatar, connect, disconnect } = useHub()
+    const { isAuthed, tokens, playerName, profileAvatar, profileImageUrl, connect, disconnect } = useHub()
     const [mode, setMode] = useState('register')
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -62,18 +62,23 @@ export default function Home() {
                     setError('Username already taken.'); return
                 }
                 const data = await res.json()
-                await connect(data.token, data.userName, data.profileAvatar ?? null, data.permission ?? '')
+                await connect(data.token, data.userName, data.profileAvatar ?? null, data.profileImageUrl ?? null, data.permission ?? '')
             } else {
                 const res = await fetch(`${API}/api/v1/Auth/LoginPlayer`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ Username: username.trim(), Password: password }),
                 })
+                if (res.status === 403) {
+                    const data = await res.json().catch(() => null)
+                    setError(data?.failureReason ?? 'Account suspended.');
+                    return
+                }
                 if (!res.ok) {
                     setError('Invalid username or password.'); return
                 }
                 const data = await res.json()
-                await connect(data.token, data.userName, data.profileAvatar ?? null, data.permission ?? '')
+                await connect(data.token, data.userName, data.profileAvatar ?? null, data.profileImageUrl ?? null, data.permission ?? '')
             }
         } catch {
             setError('Connection failed — is the server running?')
@@ -129,8 +134,8 @@ export default function Home() {
                         </div>
                         <div className="hub-player">
                             <Link className="hub-name-pill hub-profile-link" to="/profile">
-                                <span className="mini-avatar" style={profileAvatar?.startsWith('data:') ? { backgroundImage: `url(${profileAvatar})` } : { background: profileAvatar ?? 'linear-gradient(135deg,#FFD700,#0AF5F5)' }}>
-                                    {!profileAvatar?.startsWith('data:') && playerName.slice(0, 1).toUpperCase()}
+                                <span className="mini-avatar" style={profileImageUrl ? { backgroundImage: `url(${profileImageUrl})` } : { background: profileAvatar ?? 'linear-gradient(135deg,#FFD700,#0AF5F5)' }}>
+                                    {!profileImageUrl && playerName.slice(0, 1).toUpperCase()}
                                 </span>
                                 <div className="hub-online-dot" />
                                 <span>{playerName}</span>

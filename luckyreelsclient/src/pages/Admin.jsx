@@ -482,8 +482,8 @@ export default function Admin() {
                                         <td colSpan={5} className="admin-detail-cell">
                                             <div className="admin-detail">
                                                 <div className="admin-profile-card">
-                                                    <div className="admin-profile-avatar" style={p.profileAvatar?.startsWith('data:') ? { backgroundImage: `url(${p.profileAvatar})` } : p.profileAvatar ? { background: p.profileAvatar } : undefined}>
-                                                        {!p.profileAvatar?.startsWith('data:') && p.name?.slice(0, 1).toUpperCase()}
+                                                    <div className="admin-profile-avatar" style={p.profileImageUrl ? { backgroundImage: `url(${p.profileImageUrl})` } : p.profileAvatar ? { background: p.profileAvatar } : undefined}>
+                                                        {!p.profileImageUrl && p.name?.slice(0, 1).toUpperCase()}
                                                     </div>
                                                     <div className="admin-profile-main">
                                                         <div className="admin-profile-kicker">Player profile</div>

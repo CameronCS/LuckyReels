@@ -7,6 +7,9 @@ public class Player
     public string Email { get; set; } = string.Empty;
     public int Tokens { get; set; }
     public string? ProfileAvatar { get; set; }
+    public string? ProfileImageUrl { get; set; }
+    public string? ProfileImageContentType { get; set; }
+    public DateTime? ProfileImageUpdatedAt { get; set; }
     public string Permission { get; set; } = "Player";
     public bool IsOnline { get; set; }
     public DateTime? LastBonusAt { get; set; }

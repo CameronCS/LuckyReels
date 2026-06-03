@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useHub } from '../hub'
 
 export default function GameHeader({ title, tagline, accentColor, gradient }) {
-    const { tokens, playerName, profileAvatar } = useHub()
+    const { tokens, playerName, profileAvatar, profileImageUrl } = useHub()
     const navigate = useNavigate()
     const [bump, setBump] = useState(false)
     const [delta, setDelta] = useState(null)
@@ -36,8 +36,8 @@ export default function GameHeader({ title, tagline, accentColor, gradient }) {
             </div>
             <div className="header-right">
                 <button className="player-pill profile-link-pill" style={{ color: accentColor }} onClick={() => navigate('/profile')}>
-                    <span className="mini-avatar" style={profileAvatar?.startsWith('data:') ? { backgroundImage: `url(${profileAvatar})` } : { background: profileAvatar ?? 'linear-gradient(135deg,#FFD700,#0AF5F5)' }}>
-                        {!profileAvatar?.startsWith('data:') && playerName.slice(0, 1).toUpperCase()}
+                    <span className="mini-avatar" style={profileImageUrl ? { backgroundImage: `url(${profileImageUrl})` } : { background: profileAvatar ?? 'linear-gradient(135deg,#FFD700,#0AF5F5)' }}>
+                        {!profileImageUrl && playerName.slice(0, 1).toUpperCase()}
                     </span>
                     <span>{playerName}</span>
                 </button>

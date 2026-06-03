@@ -11,6 +11,7 @@ export function HubProvider({ children }) {
     const [tokens, setTokens] = useState(0)
     const [playerName, setName] = useState('')
     const [profileAvatar, setProfileAvatarState] = useState(null)
+    const [profileImageUrl, setProfileImageUrl] = useState(null)
     const [permission, setPermission] = useState('')
     const [notifications, setNotifications] = useState([])
     const connecting = useRef(false)
@@ -36,6 +37,7 @@ export function HubProvider({ children }) {
         if (connecting.current) return
         connecting.current = true
         setProfileAvatarState(null)
+        setProfileImageUrl(null)
         setPermission('')
 
         const c = new signalR.HubConnectionBuilder()
@@ -67,6 +69,7 @@ export function HubProvider({ children }) {
                 .then(profile => {
                     if (!profile) return
                     setProfileAvatarState(profile.profileAvatar ?? null)
+                    setProfileImageUrl(profile.profileImageUrl ?? null)
                     setPermission(profile.permission ?? '')
                     setTokens(profile.tokens ?? 0)
                 })
@@ -79,10 +82,11 @@ export function HubProvider({ children }) {
         }
     }
 
-    async function connect(token, name, avatar = null, userPermission = '') {
+    async function connect(token, name, avatar = null, imageUrl = null, userPermission = '') {
         localStorage.setItem('lr_token', token)
         localStorage.setItem('lr_user', name)
         setProfileAvatarState(avatar)
+        setProfileImageUrl(imageUrl)
         setPermission(userPermission)
         await _doConnect(token, name)
     }
@@ -100,11 +104,12 @@ export function HubProvider({ children }) {
         setTokens(0)
         setName('')
         setProfileAvatarState(null)
+        setProfileImageUrl(null)
         setPermission('')
     }
 
     return (
-        <HubCtx.Provider value={{ conn, isAuthed, tokens, setTokens, playerName, profileAvatar, setProfileAvatar, permission, setPermission, connect, disconnect, notifications, dismissNotification }}>
+        <HubCtx.Provider value={{ conn, isAuthed, tokens, setTokens, playerName, profileAvatar, setProfileAvatar, profileImageUrl, setProfileImageUrl, permission, setPermission, connect, disconnect, notifications, dismissNotification }}>
             {children}
         </HubCtx.Provider>
     )

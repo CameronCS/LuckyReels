@@ -11,6 +11,9 @@ public class AuthGateway(ActiveTenantService activeTenantService, IAuthService a
     [HttpPost]
     public async Task<ActionResult<AuthenticationResponse>> LoginPlayer(AuthenticationRequest request, CancellationToken ct) {
         AuthenticationResponse response = await authService.LoginPlayerAsync(request, ct);
+        if (response.FailureReason == "Account suspended.") {
+            return StatusCode(403, response);
+        }
         if (!response.IsAuthenticated)
             return Unauthorized();
         return Ok(response);

@@ -25,6 +25,9 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
             Email = p.Email,
             Tokens = p.Tokens,
             ProfileAvatar = p.ProfileAvatar,
+            ProfileImageUrl = BuildProfileImageUrl(p),
+            ProfileImageContentType = p.ProfileImageContentType,
+            ProfileImageUpdatedAt = p.ProfileImageUpdatedAt,
             Permission = p.Permission,
             IsOnline = onlineIds.Contains(p.Id),
             CreatedAt = p.CreatedAt,
@@ -58,4 +61,9 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
 
     private static bool IsValidPermission(string permission)
         => permission is "Player" or "VIP" or "Moderated" or "Suspended";
+
+    private static string? BuildProfileImageUrl(UsrPlayer player)
+        => player.ProfileImageContentType is null
+            ? null
+            : $"/api/v1/Profile/AvatarImage?playerId={player.Id}&v={(player.ProfileImageUpdatedAt ?? player.CreatedAt).Ticks}";
 }

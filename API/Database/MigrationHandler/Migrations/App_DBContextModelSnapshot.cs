@@ -399,6 +399,16 @@ namespace MigrationHandler.Migrations
                     b.Property<string>("ProfileAvatar")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("ProfileImage")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfileImageContentType")
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime?>("ProfileImageUpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Tokens")
                         .HasColumnType("int");
 

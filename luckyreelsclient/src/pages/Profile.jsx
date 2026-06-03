@@ -13,7 +13,7 @@ const AVATAR_PRESETS = [
 ]
 
 export default function Profile() {
-    const { isAuthed, tokens, playerName, profileAvatar, setProfileAvatar, permission, setPermission, disconnect } = useHub()
+    const { isAuthed, tokens, playerName, profileAvatar, setProfileAvatar, profileImageUrl, setProfileImageUrl, permission, setPermission, disconnect } = useHub()
     const navigate = useNavigate()
     const fileRef = useRef(null)
     const [message, setMessage] = useState('')
@@ -33,6 +33,7 @@ export default function Profile() {
             .then(profile => {
                 if (!profile) return
                 setProfileAvatar(profile.profileAvatar ?? null)
+                setProfileImageUrl(profile.profileImageUrl ?? null)
                 setPermission(profile.permission ?? '')
             })
             .catch(() => showMessage('Could not refresh profile.'))
@@ -58,6 +59,7 @@ export default function Profile() {
             }
             const profile = await res.json()
             setProfileAvatar(profile.profileAvatar ?? null)
+            setProfileImageUrl(profile.profileImageUrl ?? null)
             setPermission(profile.permission ?? '')
             showMessage(successMessage)
         } catch {
@@ -87,16 +89,39 @@ export default function Profile() {
             return
         }
 
-        const reader = new FileReader()
-        reader.onload = () => {
-            saveAvatar(reader.result, 'Profile picture uploaded.')
-        }
-        reader.readAsDataURL(file)
+        saveImage(file)
         event.target.value = ''
     }
 
-    const avatarStyle = profileAvatar?.startsWith('data:')
-        ? { backgroundImage: `url(${profileAvatar})` }
+    async function saveImage(file) {
+        const token = localStorage.getItem('lr_token')
+        const form = new FormData()
+        form.append('image', file)
+        setSaving(true)
+        try {
+            const res = await fetch('/api/v1/Profile/AvatarImage', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: form,
+            })
+            if (!res.ok) {
+                showMessage('Could not upload profile picture.')
+                return
+            }
+            const profile = await res.json()
+            setProfileAvatar(profile.profileAvatar ?? null)
+            setProfileImageUrl(profile.profileImageUrl ?? null)
+            setPermission(profile.permission ?? '')
+            showMessage('Profile picture uploaded.')
+        } catch {
+            showMessage('Could not reach server.')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const avatarStyle = profileImageUrl
+        ? { backgroundImage: `url(${profileImageUrl})` }
         : { background: profileAvatar ?? AVATAR_PRESETS[0] }
 
     return (
@@ -113,7 +138,7 @@ export default function Profile() {
                     <section className="profile-panel">
                         <div className="profile-avatar-wrap">
                             <div className="profile-avatar" style={avatarStyle}>
-                                {!profileAvatar?.startsWith('data:') && playerName.slice(0, 1).toUpperCase()}
+                                {!profileImageUrl && playerName.slice(0, 1).toUpperCase()}
                             </div>
                             <button className="profile-upload-btn" onClick={() => fileRef.current?.click()}>Upload image</button>
                             <input ref={fileRef} className="profile-file-input" type="file" accept="image/*" onChange={uploadAvatar} />

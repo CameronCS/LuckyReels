@@ -18,7 +18,20 @@ public class AdminDataService(App_DBContext context, ActiveTenantService activeT
         } else {
             q = q.OrderBy(p => p.Name);
         }
-        return await q.Skip(skip).Take(take).ToListAsync(ct);
+        return await q.Skip(skip).Take(take)
+            .Select(p => new UsrPlayer {
+                Id = p.Id,
+                Name = p.Name,
+                Email = p.Email,
+                Tokens = p.Tokens,
+                LastBonusAt = p.LastBonusAt,
+                CreatedAt = p.CreatedAt,
+                ProfileAvatar = p.ProfileAvatar,
+                ProfileImageContentType = p.ProfileImageContentType,
+                ProfileImageUpdatedAt = p.ProfileImageUpdatedAt,
+                Permission = p.Permission
+            })
+            .ToListAsync(ct);
     }
 
     public async Task<int> GetPlayerCountAsync(string? search, CancellationToken ct = default) {
