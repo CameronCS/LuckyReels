@@ -6,7 +6,7 @@ using SystemFramework.Security;
 namespace DataAccessService;
 
 public class AdminDataService(App_DBContext context, ActiveTenantService activeTenantService) : BaseDataService(context, activeTenantService), IAdminDataService {
-    public async Task<List<UsrPlayer>> GetPlayersPagedAsync(int skip, int take, string? search, IReadOnlySet<Guid> onlineIds, CancellationToken ct = default) {
+    public async Task<List<UsrPlayer>> GetPlayersPagedAsync(int skip, int take, string search, IReadOnlySet<Guid> onlineIds, CancellationToken ct = default) {
         IQueryable<UsrPlayer> q = _context.UsrPlayers;
         if (!string.IsNullOrWhiteSpace(search)) {
             q = q.Where(p => p.Name.Contains(search));
@@ -34,7 +34,7 @@ public class AdminDataService(App_DBContext context, ActiveTenantService activeT
             .ToListAsync(ct);
     }
 
-    public async Task<int> GetPlayerCountAsync(string? search, CancellationToken ct = default) {
+    public async Task<int> GetPlayerCountAsync(string search, CancellationToken ct = default) {
         IQueryable<UsrPlayer> q = _context.UsrPlayers;
         if (!string.IsNullOrWhiteSpace(search)) {
             q = q.Where(p => p.Name.Contains(search));
@@ -42,7 +42,7 @@ public class AdminDataService(App_DBContext context, ActiveTenantService activeT
         return await q.CountAsync(ct);
     }
 
-    public async Task<UsrPlayer?> GetPlayerByIdAsync(Guid id, CancellationToken ct = default)
+    public async Task<UsrPlayer> GetPlayerByIdAsync(Guid id, CancellationToken ct = default)
         => await _context.UsrPlayers.FirstOrDefaultAsync(p => p.Id == id, ct);
 
     public async Task SetPlayerTokensAsync(Guid playerId, int tokens, CancellationToken ct = default)

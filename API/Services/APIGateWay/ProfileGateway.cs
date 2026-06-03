@@ -8,7 +8,7 @@ using SystemFramework.Security;
 
 namespace APIGateWay;
 
-public record UpdateAvatarRequest(string? ProfileAvatar);
+public record UpdateAvatarRequest(string ProfileAvatar);
 
 [Authorize(Roles = "Player")]
 public class ProfileGateway(ActiveTenantService activeTenantService, IAuthService authService) : BaseController(activeTenantService) {
@@ -16,13 +16,16 @@ public class ProfileGateway(ActiveTenantService activeTenantService, IAuthServic
 
     [HttpGet]
     public async Task<ActionResult<Player>> Me(CancellationToken ct = default) {
-        Player? player = await authService.GetPlayerProfileAsync(PlayerId, ct);
+        Player player = await authService.GetPlayerProfileAsync(PlayerId, ct);
         return player is null ? NotFound() : Ok(player);
     }
 
     [HttpPost]
     public async Task<ActionResult<Player>> Avatar([FromBody] UpdateAvatarRequest request, CancellationToken ct = default) {
-        Player? player = await authService.UpdatePlayerAvatarAsync(PlayerId, request.ProfileAvatar, ct);
+        string profileAvatar = request is null || string.IsNullOrEmpty(request.ProfileAvatar)
+            ? null
+            : request.ProfileAvatar;
+        Player player = await authService.UpdatePlayerAvatarAsync(PlayerId, profileAvatar, ct);
         return player is null ? NotFound() : Ok(player);
     }
 
@@ -37,14 +40,14 @@ public class ProfileGateway(ActiveTenantService activeTenantService, IAuthServic
 
         await using MemoryStream stream = new();
         await image.CopyToAsync(stream, ct);
-        Player? player = await authService.UpdatePlayerImageAsync(PlayerId, stream.ToArray(), image.ContentType, ct);
+        Player player = await authService.UpdatePlayerImageAsync(PlayerId, stream.ToArray(), image.ContentType, ct);
         return player is null ? NotFound() : Ok(player);
     }
 
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> AvatarImage([FromQuery] Guid playerId, CancellationToken ct = default) {
-        (byte[]? image, string? contentType) = await authService.GetPlayerImageAsync(playerId, ct);
+        (byte[] image, string contentType) = await authService.GetPlayerImageAsync(playerId, ct);
         return image is null ? NotFound() : File(image, contentType ?? "application/octet-stream");
     }
 }

@@ -27,25 +27,25 @@ public class AuthService(App_DBContext context, ActiveTenantService activeTenant
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task UpdatePlayerAvatarAsync(Guid playerId, string? avatar, CancellationToken ct = default)
+    public async Task UpdatePlayerAvatarAsync(Guid playerId, string avatar, CancellationToken ct = default)
         => await _context.UsrPlayers
             .Where(p => p.Id == playerId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(p => p.ProfileAvatar, avatar)
-                .SetProperty(p => p.ProfileImage, (byte[]?)null)
-                .SetProperty(p => p.ProfileImageContentType, (string?)null)
+                .SetProperty(p => p.ProfileImage, (byte[])null)
+                .SetProperty(p => p.ProfileImageContentType, (string)null)
                 .SetProperty(p => p.ProfileImageUpdatedAt, (DateTime?)null), ct);
 
     public async Task UpdatePlayerImageAsync(Guid playerId, byte[] image, string contentType, DateTime updatedAt, CancellationToken ct = default)
         => await _context.UsrPlayers
             .Where(p => p.Id == playerId)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(p => p.ProfileAvatar, (string?)null)
+                .SetProperty(p => p.ProfileAvatar, (string)null)
                 .SetProperty(p => p.ProfileImage, image)
                 .SetProperty(p => p.ProfileImageContentType, contentType)
                 .SetProperty(p => p.ProfileImageUpdatedAt, updatedAt), ct);
 
-    public async Task<(byte[]? Image, string? ContentType)> GetPlayerImageAsync(Guid playerId, CancellationToken ct = default) {
+    public async Task<(byte[] Image, string ContentType)> GetPlayerImageAsync(Guid playerId, CancellationToken ct = default) {
         var row = await _context.UsrPlayers
             .Where(p => p.Id == playerId)
             .Select(p => new { p.ProfileImage, p.ProfileImageContentType })

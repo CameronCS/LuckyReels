@@ -11,7 +11,7 @@ using IDataLayerService = DataAccessServiceInterface.IAdminDataService;
 namespace BusinessLogicService;
 
 public class AdminService(IDataLayerService dataLayerService, ActiveTenantService activeTenantService, IHubContext<SystemHub> systemHub, IMapper mapper, IAdminBroadcastService adminBroadcast, IOnlineTracker onlineTracker) : BaseBusinessServiceWithDataService<IDataLayerService>(dataLayerService, activeTenantService, systemHub, mapper), IAdminService {
-    public async Task<(List<Player> Players, int Total)> GetPlayersAsync(int page, int pageSize, string? search, CancellationToken ct = default) {
+    public async Task<(List<Player> Players, int Total)> GetPlayersAsync(int page, int pageSize, string search, CancellationToken ct = default) {
         int skip = (page - 1) * pageSize;
 
         IReadOnlySet<Guid> onlineIds = onlineTracker.GetOnlineIds();
@@ -40,7 +40,7 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
         => adminBroadcast.BroadcastNotificationAsync(type, message);
 
     public async Task SetTokensAsync(Guid playerId, int tokens, CancellationToken ct = default) {
-        UsrPlayer? player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
+        UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
         if (player is null) {
             return;
         }
@@ -62,7 +62,7 @@ public class AdminService(IDataLayerService dataLayerService, ActiveTenantServic
     private static bool IsValidPermission(string permission)
         => permission is "Player" or "VIP" or "Moderated" or "Suspended";
 
-    private static string? BuildProfileImageUrl(UsrPlayer player)
+    private static string BuildProfileImageUrl(UsrPlayer player)
         => player.ProfileImageContentType is null
             ? null
             : $"/api/v1/Profile/AvatarImage?playerId={player.Id}&v={(player.ProfileImageUpdatedAt ?? player.CreatedAt).Ticks}";

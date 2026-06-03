@@ -90,12 +90,12 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
         };
     }
 
-    public async Task<Player?> GetPlayerProfileAsync(Guid playerId, CancellationToken ct = default) {
+    public async Task<Player> GetPlayerProfileAsync(Guid playerId, CancellationToken ct = default) {
         UsrPlayer player = await _dataLayerService.GetPlayerByIdAsync(playerId, ct);
         return player is null ? null : ToProfile(player);
     }
 
-    public async Task<Player?> UpdatePlayerImageAsync(Guid playerId, byte[] image, string contentType, CancellationToken ct = default) {
+    public async Task<Player> UpdatePlayerImageAsync(Guid playerId, byte[] image, string contentType, CancellationToken ct = default) {
         if (image.Length == 0) {
             throw new InvalidOperationException("Profile image is required.");
         }
@@ -111,10 +111,10 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
         return player is null ? null : ToProfile(player);
     }
 
-    public Task<(byte[]? Image, string? ContentType)> GetPlayerImageAsync(Guid playerId, CancellationToken ct = default)
+    public Task<(byte[] Image, string ContentType)> GetPlayerImageAsync(Guid playerId, CancellationToken ct = default)
         => _dataLayerService.GetPlayerImageAsync(playerId, ct);
 
-    public async Task<Player?> UpdatePlayerAvatarAsync(Guid playerId, string? avatar, CancellationToken ct = default) {
+    public async Task<Player> UpdatePlayerAvatarAsync(Guid playerId, string avatar, CancellationToken ct = default) {
         if (!string.IsNullOrWhiteSpace(avatar) && avatar.Length > 400_000) {
             throw new InvalidOperationException("Profile image is too large.");
         }
@@ -149,7 +149,7 @@ public class AuthService(IDataLayerService dataLayerService, ActiveTenantService
             CreatedAt = player.CreatedAt
         };
 
-    private static string? BuildProfileImageUrl(UsrPlayer player)
+    private static string BuildProfileImageUrl(UsrPlayer player)
         => player.ProfileImageContentType is null
             ? null
             : $"/api/v1/Profile/AvatarImage?playerId={player.Id}&v={(player.ProfileImageUpdatedAt ?? player.CreatedAt).Ticks}";
