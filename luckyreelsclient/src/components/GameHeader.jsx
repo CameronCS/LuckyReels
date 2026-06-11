@@ -46,7 +46,7 @@ export default function GameHeader({ title, tagline, accentColor, gradient }) {
                     <div style={{ position: 'relative' }}>
                         <div className={`tokens-value${bump ? ' bump' : ''}`}>{tokens.toLocaleString()}</div>
                         {delta !== null && delta !== 0 && (
-                            <div className={`tokens-delta${delta > 0 ? ' delta-pos' : ' delta-neg'}`}>
+                            <div key={delta + '-' + Date.now()} className={`tokens-delta${delta > 0 ? ' delta-pos' : ' delta-neg'}`}>
                                 {delta > 0 ? `+${delta.toLocaleString()}` : delta.toLocaleString()}
                             </div>
                         )}

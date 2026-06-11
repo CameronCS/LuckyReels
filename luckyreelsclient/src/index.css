@@ -749,14 +749,40 @@ body {
 }
 
     .tokens-value.bump {
-        animation: bump .3s ease;
+        animation: bump .35s ease;
     }
 
 @keyframes bump {
     50% {
-        transform: scale(1.15);
         color: var(--green);
+        text-shadow: 0 0 18px rgba(0,255,135,.55);
     }
+}
+
+.tokens-delta {
+    position: absolute;
+    bottom: calc(100% + 2px);
+    right: 0;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 18px;
+    letter-spacing: 2px;
+    pointer-events: none;
+    white-space: nowrap;
+    animation: deltaFloat 1.4s ease forwards;
+}
+
+.tokens-delta.delta-pos {
+    color: #22c55e;
+}
+
+.tokens-delta.delta-neg {
+    color: #ef4444;
+}
+
+@keyframes deltaFloat {
+    0%   { opacity: 1; transform: translateY(0); }
+    25%  { opacity: 1; transform: translateY(-8px); }
+    100% { opacity: 0; transform: translateY(-20px); }
 }
 
 /* ── Shared controls ─────────────────────────────────────────────── */

@@ -67,7 +67,6 @@ export default function Blackjack() {
         const nb = msg.newBalance ?? msg.balance
         setPlayerHand(msg.playerHand)
         setPlayerTotal(msg.playerTotal)
-        // Show first two dealer cards immediately, then animate extra cards
         setDealerCards(msg.dealerHand.slice(0, 2))
         for (let i = 2; i < msg.dealerHand.length; i++) {
             await sleep(500)
@@ -81,13 +80,26 @@ export default function Blackjack() {
     }
 
     function deal() {
-        if (phase !== 'idle' || tokens < bet) {
-            return
-        }
+        if (phase !== 'idle' || tokens < bet) return
         setPhase('waiting')
-        setPlayerHand([]); setDealerCards([]); setResult(''); setNet(0); setDealerTotal(0)
-        conn.invoke('BlackjackDeal', bet)
+        setPlayerHand([]); setDealerCards([]); setResult(''); setNet(0); setDealerTotal(0); setDealerSub(0); setPlayerTotal(0)
         setActiveBet(bet)
+        conn.invoke('BlackjackDeal', bet).catch(() => setPhase('idle'))
+    }
+
+    function hit() {
+        setPhase('waiting')
+        conn.invoke('BlackjackHit').catch(() => setPhase('player'))
+    }
+
+    function stand() {
+        setPhase('waiting')
+        conn.invoke('BlackjackStand').catch(() => setPhase('player'))
+    }
+
+    function double() {
+        setPhase('waiting')
+        conn.invoke('BlackjackDouble').catch(() => setPhase('player'))
     }
 
     function resultText() {
@@ -146,7 +158,7 @@ export default function Blackjack() {
                         </div>
                         <div className="cards-row">
                             {dealerCards.map((c, i) => <CardEl key={i} card={c} />)}
-                            {phase === 'player' && <div className="card face-down" />}
+                            {dealerCards.length === 1 && phase !== 'over' && <div className="card face-down" />}
                         </div>
                     </div>
                     <div className="bj-side player-side">
@@ -161,9 +173,9 @@ export default function Blackjack() {
                         </div>
                     </div>
 
-                    {phase === 'over' && (
-                        <div className={`result-bar ${resultCls()}`}>{resultText()}</div>
-                    )}
+                    <div className={`result-bar ${phase === 'over' ? resultCls() : ''}`} style={{ visibility: phase === 'over' ? 'visible' : 'hidden' }}>
+                        {phase === 'over' ? resultText() : ' '}
+                    </div>
                 </div>
 
                 {/* Controls */}
@@ -193,14 +205,13 @@ export default function Blackjack() {
                     )}
                     {phase === 'player' && (
                         <>
-                            <button className="action-btn btn-hit" onClick={() => { setPhase('waiting'); conn.invoke('BlackjackHit') }}>HIT</button>
-                            <button className="action-btn btn-stand" onClick={() => { setPhase('waiting'); conn.invoke('BlackjackStand') }}>STAND</button>
-                            <button className="action-btn btn-double" disabled={tokens < activeBet}
-                                onClick={() => { setPhase('waiting'); conn.invoke('BlackjackDouble') }}>DOUBLE</button>
+                            <button className="action-btn btn-hit" onClick={hit}>HIT</button>
+                            <button className="action-btn btn-stand" onClick={stand}>STAND</button>
+                            <button className="action-btn btn-double" disabled={tokens < activeBet} onClick={double}>DOUBLE</button>
                         </>
                     )}
                     {phase === 'over' && (
-                        <button className="btn-primary" onClick={() => { setPhase('idle'); setPlayerHand([]); setDealerCards([]) }}>PLAY AGAIN</button>
+                        <button className="btn-primary" onClick={() => { setPhase('idle'); setPlayerHand([]); setDealerCards([]); setResult(''); setNet(0); setDealerTotal(0); setDealerSub(0); setPlayerTotal(0) }}>PLAY AGAIN</button>
                     )}
                 </div>
 
