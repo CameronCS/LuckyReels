@@ -34,7 +34,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\USER-PC\\\\OneDrive\\\\Documents\\\\dev\\\\Gambling Game\" -Directory)",
       "Bash(Select-Object Name)",
       "PowerShell(head *)",
-      "Bash(dotnet run *)"
+      "Bash(dotnet run *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); pkg=d.get\\('packages',{}\\).get\\('node_modules/@microsoft/signalr',{}\\); print\\(pkg.get\\('version','not found'\\)\\)\")",
+      "Bash(dotnet list *)"
     ]
   }
 }

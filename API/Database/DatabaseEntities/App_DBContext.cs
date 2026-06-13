@@ -77,11 +77,11 @@ public partial class App_DBContext : DbContext
             entity.HasIndex(e => new { e.PlayerId, e.CreatedAt }, "idx_LOG_Baccarat_PlayerTime");
 
             entity.Property(e => e.Id).HasColumnName("ID");
-            entity.Property(e => e.BankerHand).HasMaxLength(60);
+            entity.Property(e => e.BankerHand).HasMaxLength(200);
             entity.Property(e => e.BetType).HasMaxLength(10);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.Outcome).HasMaxLength(10);
-            entity.Property(e => e.PlayerHand).HasMaxLength(60);
+            entity.Property(e => e.PlayerHand).HasMaxLength(200);
             entity.Property(e => e.PlayerId).HasColumnName("PlayerID");
 
             entity.HasOne(d => d.Player).WithMany(p => p.LogBaccarats)

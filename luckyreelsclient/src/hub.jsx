@@ -41,15 +41,25 @@ export function HubProvider({ children }) {
         setPermission('')
 
         const c = new signalR.HubConnectionBuilder()
-            .withUrl(`${API}/game`, { accessTokenFactory: () => token })
+            .withUrl(`${API}/game`, { accessTokenFactory: () => localStorage.getItem('lr_token') })
             .withAutomaticReconnect()
             .build()
 
         c.on('TokensUpdated', t => setTokens(t))
-        c.onclose(() => { setConn(null); setIsAuthed(false) })
+        c.onclose(() => {
+            setConn(null)
+            setIsAuthed(false)
+            setTokens(0)
+            setName('')
+            setProfileAvatarState(null)
+            setProfileImageUrl(null)
+            setPermission('')
+            localStorage.removeItem('lr_token')
+            localStorage.removeItem('lr_user')
+        })
 
         const n = new signalR.HubConnectionBuilder()
-            .withUrl(`${API}/hub`, { accessTokenFactory: () => token })
+            .withUrl(`${API}/hub`, { accessTokenFactory: () => localStorage.getItem('lr_token') })
             .withAutomaticReconnect()
             .build()
 
