@@ -46,17 +46,7 @@ export function HubProvider({ children }) {
             .build()
 
         c.on('TokensUpdated', t => setTokens(t))
-        c.onclose(() => {
-            setConn(null)
-            setIsAuthed(false)
-            setTokens(0)
-            setName('')
-            setProfileAvatarState(null)
-            setProfileImageUrl(null)
-            setPermission('')
-            localStorage.removeItem('lr_token')
-            localStorage.removeItem('lr_user')
-        })
+        c.onclose(() => { setConn(null); setIsAuthed(false) })
 
         const n = new signalR.HubConnectionBuilder()
             .withUrl(`${API}/hub`, { accessTokenFactory: () => localStorage.getItem('lr_token') })
